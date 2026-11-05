@@ -14,7 +14,11 @@ SECRET_KEY = os.environ.get(
     'django-insecure-change-this-in-production-tms-fyp-2026'
 )
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',')
+    if host.strip()
+]
 
 # PRODUCTION SECURITY HEADERS & DEFENSES
 SECURE_BROWSER_XSS_FILTER = True
@@ -26,7 +30,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 # CSRF CONFIGURATION
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1,http://0.0.0.0').split(',')
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1,http://0.0.0.0,https://*.vercel.app').split(',')
     if origin.strip()
 ]
 CSRF_COOKIE_HTTPONLY = False  # Allows HTMX reading if required, or keep session/Lax
@@ -101,12 +105,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tms.wsgi.application'
 
 # DATABASE
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# DATABASE CONFIGURATION
+if os.environ.get('VERCEL'):
+    import shutil
+    tmp_dir = Path('/tmp')
+    tmp_db = tmp_dir / 'db.sqlite3'
+    orig_db = BASE_DIR / 'db.sqlite3'
+    if not tmp_db.exists() and orig_db.exists():
+        shutil.copy2(orig_db, tmp_db)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': tmp_db if tmp_db.exists() else (BASE_DIR / 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # CUSTOM USER MODEL
 AUTH_USER_MODEL = 'accounts.User'
@@ -145,7 +164,11 @@ STORAGES = {
 
 # MEDIA FILES
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+if os.environ.get('VERCEL'):
+    MEDIA_ROOT = Path('/tmp/media')
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+else:
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
