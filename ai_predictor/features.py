@@ -22,7 +22,7 @@ def extract_student_features(student) -> dict:
     - route_rent: nominal monthly rent amount
     - semester_num: numeric semester
     """
-    payments = FeePayment.objects.filter(student=student).order_by('created_at')
+    payments = FeePayment.objects.filter(student=student).order_by('created_at', 'id')
 
     total = payments.count()
     paid = payments.filter(status='Paid').count()
@@ -30,7 +30,7 @@ def extract_student_features(student) -> dict:
 
     # Consecutive streak of unpaid months ending at latest
     consecutive = 0
-    for p in payments.order_by('-created_at'):
+    for p in payments.order_by('-created_at', '-id'):
         if p.status == 'Unpaid':
             consecutive += 1
         else:

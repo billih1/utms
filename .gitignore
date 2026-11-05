@@ -35,4 +35,9 @@ Thumbs.db
 # ML models (large files)
 ml_models/*.joblib
 
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
 # ECC (keep .agents tracked)

@@ -3,6 +3,7 @@ TMS - University Transport Management System
 Django settings for tms project.
 """
 import os
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,3 +125,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 1800  # 30 minutes
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# TEST SPEEDUP (Fast password hasher during automated tests)
+if 'test' in sys.argv or any('pytest' in arg for arg in sys.argv):
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
