@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Sum
+from decimal import Decimal
 from django.utils import timezone
 from accounts.decorators import accountant_required
 from students.models import Student
+from transport.models import Route
 from .models import FeePayment, Voucher, Challan, Receipt
 from .forms import GenerateDuesForm, PaymentRecordForm
 from .services import generate_monthly_dues, get_or_create_voucher, get_or_create_challan, record_payment
@@ -105,9 +107,109 @@ def print_voucher(request, pk):
 
 def print_challan(request, pk):
     challan = get_object_or_404(Challan.objects.select_related('fee_payment__student__route', 'fee_payment__student__van'), pk=pk)
+    # Ensure QR code is attached if missing
+    if not challan.qr_image:
+        challan = get_or_create_challan(challan.fee_payment)
     return render(request, 'finance/print_challan.html', {'challan': challan})
 
 
+@accountant_required
+def bulk_print_challans(request):
+    """
+    Bulk print 3-part bank deposit challans for all students for a selected month and optional route.
+    Each student's 3-part challan is formatted to print on its own landscape A4 page.
+    """
+    month = request.GET.get('month', '').strip()
+    route_id = request.GET.get('route', '').strip()
+
+    if not month:
+        month = timezone.now().strftime("%b %Y")
+
+    payments = FeePayment.objects.filter(month=month).select_related('student', 'student__route', 'student__van')
+    if route_id:
+        payments = payments.filter(student__route_id=route_id)
+
+    challans = []
+    for p in payments:
+        challan = get_or_create_challan(p)
+        challans.append(challan)
+
+    routes = Route.objects.filter(is_active=True)
+
+    return render(request, 'finance/bulk_print_challans.html', {
+        'challans': challans,
+        'selected_month': month,
+        'selected_route': route_id,
+        'routes': routes,
+        'total_count': len(challans),
+    })
+
+
+@accountant_required
+def bulk_print_vouchers(request):
+    """
+    Bulk print vouchers for all students for a selected month and optional route.
+    """
+    month = request.GET.get('month', '').strip()
+    route_id = request.GET.get('route', '').strip()
+
+    if not month:
+        month = timezone.now().strftime("%b %Y")
+
+    payments = FeePayment.objects.filter(month=month).select_related('student', 'student__route', 'student__van')
+    if route_id:
+        payments = payments.filter(student__route_id=route_id)
+
+    vouchers = []
+    for p in payments:
+        voucher = get_or_create_voucher(p)
+        vouchers.append(voucher)
+
+    routes = Route.objects.filter(is_active=True)
+
+    return render(request, 'finance/bulk_print_vouchers.html', {
+        'vouchers': vouchers,
+        'selected_month': month,
+        'selected_route': route_id,
+        'routes': routes,
+        'total_count': len(vouchers),
+    })
+
+
 def print_receipt(request, pk):
-    receipt = get_object_or_404(Receipt.objects.select_related('fee_payment__student__route', 'fee_payment__student__van'), pk=pk)
-    return render(request, 'finance/print_receipt.html', {'receipt': receipt})
+    """
+    Prints official fee payment receipt and student statement of account showing
+    current payment settlement plus remaining dues breakdown across past and current months.
+    """
+    receipt = get_object_or_404(
+        Receipt.objects.select_related(
+            'fee_payment__student',
+            'fee_payment__student__route',
+            'fee_payment__student__van'
+        ),
+        pk=pk
+    )
+    student = receipt.fee_payment.student
+
+    # All student fee history
+    student_payments = FeePayment.objects.filter(student=student).order_by('-created_at', '-id')
+    unpaid_payments = student_payments.filter(status=FeePayment.Status.UNPAID)
+    total_remaining = unpaid_payments.aggregate(s=Sum('amount'))['s'] or Decimal('0.00')
+    total_cleared = student_payments.filter(status=FeePayment.Status.PAID).aggregate(s=Sum('amount_paid'))['s'] or Decimal('0.00')
+
+    # Latest unpaid challan if any remaining dues exist
+    latest_unpaid_challan = None
+    if unpaid_payments.exists():
+        first_unpaid = unpaid_payments.first()
+        latest_unpaid_challan = get_or_create_challan(first_unpaid)
+
+    context = {
+        'receipt': receipt,
+        'student': student,
+        'student_payments': student_payments,
+        'unpaid_payments': unpaid_payments,
+        'total_remaining': total_remaining,
+        'total_cleared': total_cleared,
+        'latest_unpaid_challan': latest_unpaid_challan,
+    }
+    return render(request, 'finance/print_receipt.html', context)

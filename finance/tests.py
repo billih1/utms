@@ -141,3 +141,56 @@ class FinanceAppTests(TestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.status, FeePayment.Status.UNPAID)
         self.assertEqual(payment.amount_paid, Decimal('2000.00'))
+
+    def test_challan_bank_qr_and_account_details(self):
+        generate_monthly_dues('Apr 2027')
+        payment = FeePayment.objects.get(student=self.student, month='Apr 2027')
+        challan = get_or_create_challan(payment)
+
+        self.assertEqual(challan.bank_name, 'National Bank of Pakistan (NBP)')
+        self.assertEqual(challan.account_number, '04510034829101')
+        self.assertEqual(challan.iban, 'PK36NBPA0004510034829101')
+        self.assertTrue(bool(challan.qr_image))
+        self.assertIn('raast://pay', challan.qr_data)
+        self.assertIn('04510034829101', challan.qr_data)
+
+    def test_bulk_print_challans_and_vouchers(self):
+        generate_monthly_dues('May 2027')
+
+        # Bulk challans view
+        res = self.client.get(reverse('finance:bulk_print_challans'), {'month': 'May 2027'})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'NATIONAL BANK OF PAKISTAN')
+        self.assertContains(res, 'Bank Copy')
+        self.assertContains(res, 'Accounts Copy')
+        self.assertContains(res, 'Student Copy')
+
+        # Bulk vouchers view
+        res = self.client.get(reverse('finance:bulk_print_vouchers'), {'month': 'May 2027'})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Fee Vouchers Batch')
+
+    def test_print_receipt_with_remaining_dues_ledger(self):
+        # Create an unpaid prior month
+        FeePayment.objects.create(
+            student=self.student,
+            month='Jan 2026',
+            amount=Decimal('4200.00'),
+            amount_paid=Decimal('0.00'),
+            status=FeePayment.Status.UNPAID
+        )
+        # Create paid current month
+        curr = FeePayment.objects.create(
+            student=self.student,
+            month='Feb 2026',
+            amount=Decimal('4200.00'),
+            amount_paid=Decimal('4200.00'),
+            status=FeePayment.Status.PAID
+        )
+        receipt = record_payment(curr, Decimal('4200.00'), 'Paid via Bank')
+
+        res = self.client.get(reverse('finance:print_receipt', args=[receipt.pk]))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Transport Account Ledger')
+        self.assertContains(res, 'Total Remaining Dues')
+        self.assertContains(res, '4200')

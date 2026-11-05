@@ -1,3 +1,6 @@
+import csv
+import io
+import openpyxl
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
@@ -146,3 +149,88 @@ def get_vans_for_route(request, route_id):
         spare_badge = " [Spare]" if v.is_spare else ""
         options.append(f'<option value="{v.id}">{v.van_number}{spare_badge} ({v.filled_seats}/{v.capacity} seats)</option>')
     return HttpResponse("\n".join(options))
+
+
+@admin_required
+def student_import(request):
+    """
+    Automatic database integration tool to bulk-import students from CSV or Excel (.xlsx).
+    """
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        filename = uploaded_file.name.lower()
+        created_count = 0
+        updated_count = 0
+        error_rows = []
+
+        try:
+            rows_data = []
+            if filename.endswith('.csv'):
+                decoded = uploaded_file.read().decode('utf-8-sig', errors='ignore')
+                reader = csv.DictReader(io.StringIO(decoded))
+                for r in reader:
+                    rows_data.append(r)
+            elif filename.endswith(('.xlsx', '.xls')):
+                wb = openpyxl.load_workbook(uploaded_file, data_only=True)
+                ws = wb.active
+                headers = [str(c.value).strip().lower() if c.value else '' for c in ws[1]]
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    if any(row):
+                        row_dict = {headers[i]: (str(row[i]).strip() if row[i] is not None else '') for i in range(len(headers)) if i < len(row)}
+                        rows_data.append(row_dict)
+            else:
+                messages.error(request, "Unsupported format. Please upload a .csv or .xlsx file.")
+                return redirect('students:student_import')
+
+            for idx, r in enumerate(rows_data, start=2):
+                adm_no = (r.get('admission_number') or r.get('admission_no') or r.get('adm_no') or '').strip()
+                name = (r.get('name') or r.get('student_name') or '').strip()
+                program = (r.get('program') or 'BSIT').strip()
+                semester = (r.get('semester') or '1st').strip()
+                phone = (r.get('phone') or '').strip()
+                route_name = (r.get('route') or r.get('route_name') or '').strip()
+                van_num = (r.get('van') or r.get('van_number') or '').strip()
+
+                if not adm_no or not name:
+                    error_rows.append(f"Row {idx}: Missing Admission Number or Name")
+                    continue
+
+                route_obj = None
+                if route_name:
+                    route_obj = Route.objects.filter(route_name__icontains=route_name).first()
+
+                van_obj = None
+                if van_num:
+                    van_obj = Van.objects.filter(van_number__icontains=van_num).first()
+
+                student, created = Student.objects.update_or_create(
+                    admission_number=adm_no,
+                    defaults={
+                        'name': name,
+                        'program': program,
+                        'semester': semester,
+                        'phone': phone,
+                        'route': route_obj,
+                        'van': van_obj,
+                        'is_active': True,
+                    }
+                )
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+            messages.success(
+                request,
+                f"Student Data Integration Complete: {created_count} registered, {updated_count} updated."
+            )
+            if error_rows:
+                messages.warning(request, f"Warnings in {len(error_rows)} rows: {', '.join(error_rows[:3])}")
+
+            return redirect('students:student_list')
+
+        except Exception as e:
+            messages.error(request, f"Error processing file: {str(e)}")
+            return redirect('students:student_import')
+
+    return render(request, 'students/student_import.html')

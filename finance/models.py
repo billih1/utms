@@ -67,10 +67,18 @@ class Voucher(models.Model):
 
 
 class Challan(models.Model):
-    """Bank / Office payment deposit slip with unique tracking reference."""
+    """Bank / Office payment deposit slip with unique tracking reference and bank transfer QR."""
     fee_payment = models.OneToOneField(FeePayment, on_delete=models.CASCADE, related_name='challan')
     challan_number = models.CharField(max_length=50, unique=True, db_index=True)
+    bank_name = models.CharField(max_length=100, default='National Bank of Pakistan (NBP)')
+    branch_code = models.CharField(max_length=50, default='0451 - GCUF Main Campus')
+    account_title = models.CharField(max_length=150, default='GCUF Transport Fee Collection Account')
+    account_number = models.CharField(max_length=50, default='04510034829101')
+    iban = models.CharField(max_length=50, default='PK36NBPA0004510034829101')
+    raast_id = models.CharField(max_length=50, default='gcuf-transport@nbp')
     bank_office_ref = models.CharField(max_length=100, blank=True, default='Accounts GCUF')
+    qr_data = models.TextField(blank=True, default='', help_text="Verifiable bank transfer QR payload")
+    qr_image = models.ImageField(upload_to='qrcodes/challans/', blank=True, null=True)
     issue_date = models.DateField(auto_now_add=True)
 
     def __str__(self):

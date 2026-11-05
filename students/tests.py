@@ -147,3 +147,25 @@ class StudentAppTests(TestCase):
         res = self.client.get(reverse('students:get_vans_for_route', args=[self.route.id]))
         self.assertEqual(res.status_code, 200)
         self.assertIn('SR-101', res.content.decode('utf-8'))
+
+    def test_student_import_csv(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        csv_content = (
+            "admission_number,name,program,semester,phone,route\n"
+            "2024-CSV-001,CSV Student One,BSIT,1st,03001111111,Samundri Road\n"
+            "2024-CSV-002,CSV Student Two,BSCS,3rd,03002222222,\n"
+        ).encode('utf-8')
+        file_obj = SimpleUploadedFile("students.csv", csv_content, content_type="text/csv")
+
+        # GET import page
+        res = self.client.get(reverse('students:student_import'))
+        self.assertEqual(res.status_code, 200)
+
+        # POST upload
+        res = self.client.post(reverse('students:student_import'), {'file': file_obj})
+        self.assertEqual(res.status_code, 302)
+
+        self.assertTrue(Student.objects.filter(admission_number='2024-CSV-001').exists())
+        self.assertTrue(Student.objects.filter(admission_number='2024-CSV-002').exists())
+        s1 = Student.objects.get(admission_number='2024-CSV-001')
+        self.assertEqual(s1.route, self.route)

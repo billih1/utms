@@ -9,10 +9,22 @@
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Fee Management & Billing</h1>
             <p class="text-sm text-slate-500">Record payments, generate vouchers with QR codes, print bank challans, and issue receipts.</p>
         </div>
-        <a href="{% url 'finance:generate_dues' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
-            Generate Monthly Dues
-        </a>
+        <div class="flex flex-wrap items-center gap-2.5">
+            <a href="{% url 'finance:bulk_print_challans' %}{% if selected_month %}?month={{ selected_month }}{% endif %}" target="_blank"
+               class="inline-flex items-center px-3.5 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold transition shadow-sm">
+                <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i>
+                Bulk Print Challans
+            </a>
+            <a href="{% url 'finance:bulk_print_vouchers' %}{% if selected_month %}?month={{ selected_month }}{% endif %}" target="_blank"
+               class="inline-flex items-center px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-sm">
+                <i data-lucide="files" class="w-4 h-4 mr-1.5"></i>
+                Bulk Vouchers
+            </a>
+            <a href="{% url 'finance:generate_dues' %}" class="inline-flex items-center px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i>
+                Generate Dues
+            </a>
+        </div>
     </div>
 
     <!-- Search & Filter Bar -->

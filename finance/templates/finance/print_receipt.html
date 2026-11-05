@@ -2,75 +2,199 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Payment Receipt - {{ receipt.receipt_number }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Payment Clearance Receipt - {{ receipt.receipt_number }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
             .no-print { display: none !important; }
-            body { padding: 0; background: white; }
+            body { padding: 0; background: white; margin: 0; }
+            @page { size: A4 portrait; margin: 10mm; }
+            .receipt-container { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
         }
     </style>
 </head>
-<body class="bg-slate-100 p-6 min-h-screen font-sans">
-    <div class="max-w-md mx-auto mb-4 no-print flex justify-between items-center">
-        <a href="{% url 'finance:fee_list' %}" class="text-xs font-semibold text-slate-600 hover:underline">&larr; Back to Fee List</a>
-        <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow">
-            Print Official Receipt
-        </button>
-    </div>
+<body class="bg-slate-100 p-4 sm:p-6 min-h-screen font-sans text-slate-800">
 
-    <!-- Receipt Sheet (SRS Figure 17) -->
-    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-300 shadow-lg">
-        <!-- University Header -->
-        <div class="text-center border-b pb-4 border-slate-200">
-            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 tracking-wider">Official Payment Voucher</span>
-            <h1 class="text-xl font-extrabold text-slate-900 mt-2">GCUF TRANSPORT RECEIPT</h1>
-            <p class="text-xs text-slate-400 mt-0.5 font-mono">Receipt No: {{ receipt.receipt_number }}</p>
-        </div>
-
-        <div class="py-5 space-y-2.5 text-sm text-slate-700">
-            <div class="flex justify-between">
-                <span class="text-slate-500">Payment Date:</span>
-                <span class="font-medium text-slate-900">{{ receipt.printed_at|date:"d-M-Y h:i A" }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Received from:</span>
-                <span class="font-bold text-slate-900">{{ receipt.fee_payment.student.name }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Admission No:</span>
-                <span class="font-mono font-bold text-slate-900">{{ receipt.fee_payment.student.admission_number }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Route & Van:</span>
-                <span class="font-medium text-slate-900">{{ receipt.fee_payment.student.route.route_name|default:"-" }} ({{ receipt.fee_payment.student.van.van_number|default:"-" }})</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Billing Month:</span>
-                <span class="font-semibold text-slate-900">{{ receipt.fee_payment.month }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-slate-500">Settlement Status:</span>
-                <span class="font-bold text-emerald-700 uppercase">{{ receipt.fee_payment.status }}</span>
-            </div>
-            <div class="flex justify-between border-t border-slate-200 pt-3 text-base">
-                <span class="font-bold text-slate-900">Amount Paid:</span>
-                <span class="font-extrabold text-emerald-700">Rs. {{ receipt.fee_payment.amount_paid|floatformat:0 }}</span>
-            </div>
-        </div>
-
-        <!-- QR Code Verification Section (Figure 17) -->
-        <div class="mt-6 pt-4 border-t border-dashed border-slate-300 text-center">
-            {% if receipt.qr_image %}
-            <img src="{{ receipt.qr_image.url }}" alt="Receipt QR Code" class="w-36 h-36 mx-auto rounded-lg border border-slate-200 p-1 shadow-sm">
+    <!-- Action Bar (Hidden in Print) -->
+    <div class="max-w-3xl mx-auto mb-4 no-print flex items-center justify-between bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+        <a href="{% url 'finance:fee_list' %}" class="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-blue-700">
+            &larr; Back to Fee Management
+        </a>
+        <div class="flex items-center space-x-3">
+            {% if latest_unpaid_challan %}
+            <a href="{% url 'finance:print_challan' latest_unpaid_challan.pk %}" target="_blank"
+               class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                Print Remaining Dues Challan
+            </a>
             {% endif %}
-            <p class="text-[11px] font-mono text-slate-400 mt-2">scan to verify payment authenticity</p>
-        </div>
-
-        <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-end text-[11px] text-slate-400">
-            <div>Student Copy</div>
-            <div>Cashier Signature</div>
+            <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                Print Receipt & Statement
+            </button>
         </div>
     </div>
+
+    <!-- Official Receipt & Statement Document -->
+    <div class="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl border border-slate-300 shadow-lg receipt-container space-y-6">
+
+        <!-- University Header -->
+        <div class="flex items-start justify-between border-b pb-4 border-slate-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-800 font-extrabold text-base">
+                    GCUF
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold text-slate-900 leading-tight">Government College University Faisalabad</h1>
+                    <p class="text-xs text-slate-500 font-medium">Department of Transport &bull; Office of Accounts</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+                    Settled & Verified
+                </span>
+                <p class="font-mono text-xs text-slate-400 mt-1">Receipt: <strong class="text-slate-800">{{ receipt.receipt_number }}</strong></p>
+            </div>
+        </div>
+
+        <!-- Student & Route Meta Block -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+                <span class="text-slate-400 font-semibold uppercase text-[10px]">Student Name</span>
+                <p class="font-bold text-slate-900 text-sm mt-0.5">{{ student.name }}</p>
+            </div>
+            <div>
+                <span class="text-slate-400 font-semibold uppercase text-[10px]">Admission No</span>
+                <p class="font-mono font-bold text-blue-700 text-sm mt-0.5">{{ student.admission_number }}</p>
+            </div>
+            <div>
+                <span class="text-slate-400 font-semibold uppercase text-[10px]">Program & Sem</span>
+                <p class="font-semibold text-slate-800 mt-0.5">{{ student.program }} ({{ student.semester }})</p>
+            </div>
+            <div>
+                <span class="text-slate-400 font-semibold uppercase text-[10px]">Assigned Transport</span>
+                <p class="font-semibold text-slate-800 mt-0.5">{{ student.route.route_name|default:"-" }} / {{ student.van.van_number|default:"-" }}</p>
+            </div>
+        </div>
+
+        <!-- Settled Transaction Details -->
+        <div class="border border-emerald-200 bg-emerald-50/40 rounded-xl p-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-900 mb-2.5">Payment Details</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                <div>
+                    <span class="text-slate-500">Paid For Month:</span>
+                    <p class="font-bold text-slate-900 text-sm">{{ receipt.fee_payment.month }}</p>
+                </div>
+                <div>
+                    <span class="text-slate-500">Amount Paid:</span>
+                    <p class="font-extrabold text-emerald-700 text-base">Rs. {{ receipt.fee_payment.amount_paid|floatformat:0 }}/-</p>
+                </div>
+                <div>
+                    <span class="text-slate-500">Payment Timestamp:</span>
+                    <p class="font-semibold text-slate-800">{{ receipt.printed_at|date:"d-M-Y h:i A" }}</p>
+                </div>
+                <div>
+                    <span class="text-slate-500">Bank Ref / Deposit:</span>
+                    <p class="font-semibold text-slate-800">NBP GCUF Branch</p>
+                </div>
+            </div>
+            {% if receipt.fee_payment.notes %}
+            <p class="text-[11px] text-slate-600 mt-2.5 pt-2 border-t border-emerald-200/60">
+                <strong>Cashier Notes:</strong> {{ receipt.fee_payment.notes }}
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Statement of Account / Remaining Dues Ledger -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">Transport Account Ledger & Clearance Status</h3>
+                <span class="text-xs font-mono text-slate-500">Total Billed Records: {{ student_payments.count }}</span>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-200">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="py-2.5 px-3">Billing Month</th>
+                            <th class="py-2.5 px-3 text-right">Fare (PKR)</th>
+                            <th class="py-2.5 px-3 text-right">Amount Paid</th>
+                            <th class="py-2.5 px-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-700">
+                        {% for fp in student_payments %}
+                        <tr class="{% if fp.status == 'Unpaid' %}bg-amber-50/50{% else %}bg-white{% endif %}">
+                            <td class="py-2 px-3 font-semibold">{{ fp.month }}</td>
+                            <td class="py-2 px-3 text-right">Rs. {{ fp.amount|floatformat:0 }}</td>
+                            <td class="py-2 px-3 text-right font-medium">Rs. {{ fp.amount_paid|floatformat:0 }}</td>
+                            <td class="py-2 px-3 text-center">
+                                {% if fp.status == 'Paid' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">Unpaid</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Total Ledger Summary -->
+            <div class="mt-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs">
+                <div>
+                    <span class="text-slate-500">Cumulative Settled:</span>
+                    <strong class="text-emerald-700 ml-1">Rs. {{ total_cleared|floatformat:0 }}</strong>
+                </div>
+                <div class="mt-2 sm:mt-0">
+                    <span class="text-slate-500">Total Remaining Dues:</span>
+                    {% if total_remaining > 0 %}
+                    <strong class="text-red-700 text-sm ml-1">Rs. {{ total_remaining|floatformat:0 }}/-</strong>
+                    <span class="text-[10px] text-red-600 ml-1">({{ unpaid_payments.count }} month{{ unpaid_payments.count|pluralize }} pending)</span>
+                    {% else %}
+                    <strong class="text-emerald-700 text-sm ml-1">Rs. 0 (Nil Dues - 100% Cleared)</strong>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Clearance Status Banner or Remaining Dues Action -->
+        {% if total_remaining > 0 and latest_unpaid_challan %}
+        <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex items-center justify-between text-xs text-amber-900">
+            <div>
+                <strong>Notice:</strong> Outstanding dues exist. Next challan <strong>{{ latest_unpaid_challan.challan_number }}</strong> has been prepared for bank payment.
+            </div>
+            <a href="{% url 'finance:print_challan' latest_unpaid_challan.pk %}" target="_blank"
+               class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shrink-0 ml-3 no-print">
+                View Challan &rarr;
+            </a>
+        </div>
+        {% else %}
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-center text-xs font-bold text-emerald-800">
+            &#10003; TRANSPORT CLEARANCE CERTIFICATE: NO OUTSTANDING DUES ON STUDENT RECORD
+        </div>
+        {% endif %}
+
+        <!-- Verification QR Code & Signatures -->
+        <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                {% if receipt.qr_image %}
+                <img src="{{ receipt.qr_image.url }}" alt="Receipt QR" class="w-20 h-20 rounded-lg border border-slate-200 p-1 bg-white">
+                {% endif %}
+                <div class="text-[11px] text-slate-500">
+                    <p class="font-bold text-slate-800">GCUF Transport Official Digital Seal</p>
+                    <p>Tamper-evident verification payload.</p>
+                    <p class="font-mono text-[9px] text-slate-400 mt-1">Ref: {{ receipt.receipt_number }}</p>
+                </div>
+            </div>
+
+            <div class="flex space-x-8 text-[11px] text-slate-400 text-center">
+                <div class="border-t border-dotted border-slate-400 pt-1 px-4">Student Signature</div>
+                <div class="border-t border-dotted border-slate-400 pt-1 px-4">Accounts Officer Stamp</div>
+            </div>
+        </div>
+
+    </div>
+
 </body>
 </html>

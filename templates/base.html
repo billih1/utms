@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="en" class="h-full bg-slate-900 selection:bg-blue-600 selection:text-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TMS - University Transport Management System{% endblock %}</title>
+    <title>{% block title %}UTMS - University Transport Management System{% endblock %}</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,10 +15,11 @@
                         primary: {
                             50: '#f0f7ff',
                             100: '#e0effe',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            800: '#1e3a8a',
-                            900: '#172554',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#0f172a',
+                            950: '#090d16',
                         }
                     }
                 }
@@ -26,10 +27,10 @@
         }
     </script>
 
-    <!-- HTMX CDN -->
+    <!-- HTMX 2.0.4 CDN -->
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
-    <!-- Alpine.js CDN -->
+    <!-- Alpine.js 3.14.8 CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
     <!-- Lucide Icons CDN -->
@@ -39,63 +40,118 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        /* Modern 3D UI & High-FPS Hardware Accelerated Transformations */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(226, 232, 240, 0.85);
+        }
+
+        body {
+            perspective: 1200px;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+
+        /* 3D Interactive Card Lift (60 FPS CSS Hardware Accelerated) */
+        .card-3d {
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+            will-change: transform, box-shadow;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+        }
+        .card-3d:hover {
+            transform: translateY(-4px) translateZ(8px);
+            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+        }
+
+        /* Glassmorphic Navbar & Modals */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Subtle 3D Depth Shadows */
+        .depth-1 {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .depth-2 {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+        }
+
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full flex flex-col text-slate-800" x-data="{ sidebarOpen: false }">
+<body class="h-full flex flex-col bg-slate-50 text-slate-800 antialiased" x-data="{ sidebarOpen: false }" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-    <!-- Top Navigation Header -->
-    <header class="bg-primary-900 text-white shadow-md sticky top-0 z-30 no-print">
-        <div class="px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+    <!-- Top Navigation Header with 3D Glass Depth -->
+    <header class="glass-dark text-white sticky top-0 z-30 no-print border-b border-slate-800/80 shadow-md">
+        <div class="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 {% if user.is_authenticated %}
-                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-primary-800 focus:outline-none">
+                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition focus:outline-none">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
                 {% endif %}
-                <a href="{% url 'dashboard:home' %}" class="flex items-center space-x-2.5">
-                    <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-400/30">
-                        <i data-lucide="bus" class="w-5 h-5 text-blue-300"></i>
+                <a href="{% url 'dashboard:home' %}" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition transform">
+                        <i data-lucide="bus" class="w-5 h-5 text-white"></i>
                     </div>
                     <div>
-                        <span class="text-xl font-bold tracking-tight text-white">UTMS</span>
-                        <span class="text-xs text-blue-200 hidden sm:inline ml-1.5 px-2 py-0.5 rounded-full bg-blue-800/60 border border-blue-700/50">GCUF Transport</span>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-xl font-extrabold tracking-tight text-white">UTMS</span>
+                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">GCUF Transport</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 hidden sm:block">AI-Assisted University Fleet System</p>
                     </div>
                 </a>
             </div>
 
+            <!-- Header Right Menu -->
             {% if user.is_authenticated %}
             <div class="flex items-center space-x-4">
                 <div class="text-right hidden sm:block">
-                    <div class="text-sm font-semibold text-slate-100">{{ user.get_full_name|default:user.username }}</div>
-                    <div class="text-xs text-blue-300 font-medium">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
-                            {% if user.role == 'Admin' %}bg-purple-900/60 text-purple-200 border border-purple-700
-                            {% elif user.role == 'Accountant' %}bg-emerald-900/60 text-emerald-200 border border-emerald-700
-                            {% elif user.role == 'Driver' %}bg-amber-900/60 text-amber-200 border border-amber-700
-                            {% else %}bg-blue-900/60 text-blue-200 border border-blue-700{% endif %}">
+                    <div class="text-xs font-bold text-slate-200">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="mt-0.5">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide
+                            {% if user.role == 'Admin' %}bg-purple-950/80 text-purple-300 border border-purple-700/60
+                            {% elif user.role == 'Accountant' %}bg-emerald-950/80 text-emerald-300 border border-emerald-700/60
+                            {% elif user.role == 'Driver' %}bg-amber-950/80 text-amber-300 border border-amber-700/60
+                            {% else %}bg-blue-950/80 text-blue-300 border border-blue-700/60{% endif %}">
                             {{ user.role }}
                         </span>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-2">
-                    <a href="{% url 'accounts:change_password' %}" title="Change Password" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-primary-800 transition">
-                        <i data-lucide="key" class="w-5 h-5"></i>
+                    <a href="{% url 'accounts:change_password' %}" title="Change Password" class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i data-lucide="key" class="w-4 h-4"></i>
                     </a>
-                    <a href="{% url 'accounts:logout' %}" title="Sign Out" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600/80 hover:bg-red-600 text-white transition">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
-                        <span class="hidden sm:inline">Logout</span>
-                    </a>
+                    <!-- Security-Hardened Logout Form -->
+                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" title="Sign Out" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-600/80 hover:bg-red-600 text-white transition shadow-sm hover:shadow-red-600/20">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span class="hidden sm:inline">Logout</span>
+                        </button>
+                    </form>
                 </div>
             </div>
             {% else %}
             <div>
-                <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition shadow-sm">
+                <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-md shadow-blue-600/20">
                     Sign In
                 </a>
             </div>
@@ -107,112 +163,112 @@
         {% if user.is_authenticated %}
         <!-- Sidebar Navigation -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-               class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 no-print shadow-sm">
+               class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-white/95 backdrop-blur-xl border-r border-slate-200/90 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 no-print shadow-sm">
             <div class="flex-1 overflow-y-auto py-5 px-3.5 space-y-1 text-sm font-medium">
 
                 <!-- Universal / Dashboard -->
-                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-slate-500"></i>
+                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition font-semibold group">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-slate-400 group-hover:text-blue-600"></i>
                     Dashboard
                 </a>
 
                 {% if user.role == 'Admin' or user.is_superuser %}
                 <!-- Admin Navigation -->
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Transport Core</div>
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Transport Core</div>
 
-                <a href="{% url 'students:student_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="users" class="w-4 h-4 mr-3 text-slate-500"></i>
-                    Students
+                <a href="{% url 'students:student_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="users" class="w-4 h-4 mr-3 text-slate-400"></i>
+                    Students Roster
                 </a>
-                <a href="{% url 'transport:route_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-3 text-slate-500"></i>
-                    Routes & Rent
+                <a href="{% url 'transport:route_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-3 text-slate-400"></i>
+                    Routes & Fare
                 </a>
-                <a href="{% url 'transport:van_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="bus" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'transport:van_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="bus" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Vans & Capacity
                 </a>
 
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Finance & Billing</div>
-                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Finance & Billing</div>
+                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Fee Management
                 </a>
-                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-500"></i>
-                    Generate Monthly Dues
+                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-400"></i>
+                    Generate Dues
                 </a>
 
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Analytics & AI</div>
-                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 font-semibold transition">
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Analytics & AI</div>
+                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-xl text-purple-700 bg-purple-50/80 hover:bg-purple-100 font-bold transition">
                     <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
                     AI Defaulter Predictor
                 </a>
-                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Collection Report
                 </a>
-                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
                     <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
                     Defaulter Report
                 </a>
-                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Remaining Dues
                 </a>
 
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Operations & Admin</div>
-                <a href="{% url 'operations:vehicle_log_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="clipboard-list" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Operations & Admin</div>
+                <a href="{% url 'operations:vehicle_log_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="clipboard-list" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Vehicle Entry Log
                 </a>
-                <a href="{% url 'accounts:user_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="shield-check" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'accounts:user_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4 mr-3 text-slate-400"></i>
                     User Accounts & RBAC
                 </a>
 
                 {% elif user.role == 'Accountant' %}
                 <!-- Accountant Navigation -->
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Fee Collection</div>
-                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Fee Collection</div>
+                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Fee Records & Payments
                 </a>
-                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Generate Monthly Dues
                 </a>
 
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Reports & Insights</div>
-                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 font-semibold transition">
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Reports & Insights</div>
+                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-xl text-purple-700 bg-purple-50/80 hover:bg-purple-100 font-bold transition">
                     <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
                     AI Defaulter Predictor
                 </a>
-                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Collection Report
                 </a>
-                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
                     <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
                     Defaulter Report
                 </a>
-                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
-                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-500"></i>
+                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
+                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-400"></i>
                     Remaining Dues
                 </a>
 
                 {% elif user.role == 'Driver' %}
                 <!-- Driver Navigation -->
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Driver Duty</div>
-                <a href="{% url 'operations:driver_panel' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Driver Duty</div>
+                <a href="{% url 'operations:driver_panel' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-amber-700 transition">
                     <i data-lucide="steering-wheel" class="w-4 h-4 mr-3 text-amber-600"></i>
                     Driver Trip Panel
                 </a>
 
                 {% else %}
                 <!-- Student Navigation -->
-                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">My Transport</div>
-                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">My Transport</div>
+                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
                     <i data-lucide="user" class="w-4 h-4 mr-3 text-blue-600"></i>
                     My Route & Fee Status
                 </a>
@@ -221,8 +277,8 @@
 
             <!-- Footer in sidebar -->
             <div class="p-4 border-t border-slate-100 text-xs text-slate-400">
-                <div>UTMS FYP 2026</div>
-                <div class="text-[11px] text-slate-400">GCUF Transport Office</div>
+                <div class="font-bold text-slate-600">UTMS FYP 2026</div>
+                <div class="text-[11px] text-slate-400">GCUF Transport Directorate</div>
             </div>
         </aside>
         {% endif %}
@@ -231,9 +287,9 @@
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <!-- Messages Banner -->
             {% if messages %}
-            <div class="max-w-7xl mx-auto mb-6 space-y-2">
+            <div class="max-w-7xl mx-auto mb-6 space-y-2.5">
                 {% for message in messages %}
-                <div class="flex items-center justify-between p-4 rounded-xl shadow-sm text-sm font-medium
+                <div class="flex items-center justify-between p-4 rounded-2xl shadow-sm text-sm font-semibold
                     {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
                     {% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200
                     {% elif message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
@@ -254,7 +310,7 @@
     </div>
 
     <script>
-        // Initialize all icons on load
+        // Initialize Lucide icons on DOM load
         lucide.createIcons();
     </script>
     {% block extra_js %}{% endblock %}

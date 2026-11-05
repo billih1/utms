@@ -88,12 +88,54 @@ def get_or_create_voucher(fee_payment: FeePayment) -> Voucher:
 
 
 def get_or_create_challan(fee_payment: FeePayment) -> Challan:
-    """UC-10: Generates unique challan slip."""
+    """UC-10: Generates unique 3-part bank challan with bank account transfer QR code."""
     if hasattr(fee_payment, 'challan'):
-        return fee_payment.challan
+        challan = fee_payment.challan
+        if not challan.qr_image:
+            _attach_challan_qr(challan)
+            challan.save()
+        return challan
 
-    challan = Challan.objects.create(fee_payment=fee_payment)
+    challan_num = f"CHN-{uuid.uuid4().hex[:8].upper()}"
+    challan = Challan(
+        fee_payment=fee_payment,
+        challan_number=challan_num,
+        bank_name='National Bank of Pakistan (NBP)',
+        branch_code='0451 - GCUF Main Campus',
+        account_title='GCUF Transport Fee Collection Account',
+        account_number='04510034829101',
+        iban='PK36NBPA0004510034829101',
+        raast_id='gcuf-transport@nbp',
+    )
+    _attach_challan_qr(challan)
+    challan.save()
     return challan
+
+
+def _attach_challan_qr(challan: Challan) -> None:
+    fp = challan.fee_payment
+    st = fp.student
+    payload = {
+        'type': 'GCUF_BANK_CHALLAN',
+        'challan_no': challan.challan_number,
+        'bank': challan.bank_name,
+        'branch_code': challan.branch_code,
+        'account_title': challan.account_title,
+        'account_number': challan.account_number,
+        'iban': challan.iban,
+        'raast_id': challan.raast_id,
+        'student': st.name,
+        'admission_no': st.admission_number,
+        'route': st.route.route_name if st.route else 'N/A',
+        'van': st.van.van_number if st.van else 'N/A',
+        'fee_month': fp.month,
+        'amount_pkr': float(fp.amount),
+        'raast_pay_uri': f"raast://pay?iban={challan.iban}&amount={fp.amount}&ref={challan.challan_number}",
+        'issued_at': timezone.now().isoformat(),
+    }
+    content_file, qr_json = build_qr_image_file(payload, prefix='challan')
+    challan.qr_data = qr_json
+    challan.qr_image.save(content_file.name, content_file, save=False)
 
 
 def record_payment(fee_payment: FeePayment, amount_paid: Decimal, notes: str = '') -> Receipt:

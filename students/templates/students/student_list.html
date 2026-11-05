@@ -9,10 +9,16 @@
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Student Transport Roster</h1>
             <p class="text-sm text-slate-500">Manage student registrations, route and van allocations (FR-03, FR-04, FR-15).</p>
         </div>
-        <a href="{% url 'students:student_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-            <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
-            Add Student
-        </a>
+        <div class="flex items-center space-x-2">
+            <a href="{% url 'students:student_import' %}" class="inline-flex items-center px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition shadow-sm">
+                <i data-lucide="file-up" class="w-4 h-4 mr-1.5 text-blue-600"></i>
+                Import CSV / Excel
+            </a>
+            <a href="{% url 'students:student_create' %}" class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm">
+                <i data-lucide="user-plus" class="w-4 h-4 mr-1.5"></i>
+                Add Student
+            </a>
+        </div>
     </div>
 
     <!-- Multi-field Search Filter Box (SRS Figure 14) -->

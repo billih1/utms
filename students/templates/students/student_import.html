@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Import Students - UTMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="flex items-center space-x-2 text-xs text-slate-500">
+        <a href="{% url 'students:student_list' %}" class="hover:text-blue-600 font-semibold">&larr; Back to Students</a>
+        <span>/</span>
+        <span class="text-slate-800 font-bold">Database Auto-Integration</span>
+    </div>
+
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-xl space-y-6">
+        <div>
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 mb-3 border border-blue-100 shadow-sm">
+                <i data-lucide="file-up" class="w-6 h-6"></i>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Auto-Integrate Students Data</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Upload a university student list in Excel (.xlsx) or CSV format to automatically populate or update the transport database.
+            </p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            <div class="p-6 border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl text-center bg-slate-50/70 transition cursor-pointer">
+                <input type="file" name="file" id="file_input" accept=".csv, .xlsx, .xls" required class="hidden" onchange="updateFileName(this)">
+                <label for="file_input" class="cursor-pointer space-y-2 block">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-blue-600"></i>
+                    <p class="text-sm font-bold text-slate-800" id="file_label">Click to select CSV or Excel (.xlsx) spreadsheet</p>
+                    <p class="text-xs text-slate-400">Maximum file size: 10MB</p>
+                </label>
+            </div>
+
+            <!-- Expected Columns Reference -->
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+                <div class="font-bold text-slate-800 uppercase tracking-wide text-[10px]">Expected Spreadsheet Headers:</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] text-blue-800">
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">admission_number *</span>
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">name *</span>
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">program</span>
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">semester</span>
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">phone</span>
+                    <span class="bg-white px-2 py-1 rounded border border-slate-200">route (optional)</span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">If the student admission number already exists, their profile will be updated automatically.</p>
+            </div>
+
+            <div class="flex items-center space-x-3 pt-2">
+                <button type="submit" class="flex-1 py-3 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm shadow-md transition flex items-center justify-center space-x-2">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    <span>Execute Data Integration</span>
+                </button>
+                <a href="{% url 'students:student_list' %}" class="py-3 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateFileName(input) {
+        if (input.files && input.files[0]) {
+            document.getElementById('file_label').innerText = 'Selected: ' + input.files[0].name;
+        }
+    }
+</script>
+{% endblock %}
