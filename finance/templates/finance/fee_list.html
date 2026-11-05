@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Fee Records - UTMS{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Fee Management & Billing</h1>
+            <p class="text-sm text-slate-500">Record payments, generate vouchers with QR codes, print bank challans, and issue receipts.</p>
+        </div>
+        <a href="{% url 'finance:generate_dues' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
+            Generate Monthly Dues
+        </a>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="sm:col-span-2">
+                <input type="text" name="search" value="{{ search }}" placeholder="Search by student name, admission no, challan no..."
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <select name="month" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="">All Months</option>
+                    {% for m in all_months %}
+                    <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <select name="status" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="">All Statuses</option>
+                    <option value="Paid" {% if selected_status == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Unpaid" {% if selected_status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                </select>
+                <button type="submit" class="py-2 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold">Filter</button>
+                {% if search or selected_month or selected_status %}
+                <a href="{% url 'finance:fee_list' %}" class="py-2 px-3 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 text-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Fee Payments Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                    <tr>
+                        <th class="py-3 px-4">Adm No</th>
+                        <th class="py-3 px-4">Student</th>
+                        <th class="py-3 px-4">Route / Van</th>
+                        <th class="py-3 px-4">Month</th>
+                        <th class="py-3 px-4">Due (PKR)</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-center">Docs (QR)</th>
+                        <th class="py-3 px-4 text-right">Payment</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for p in payments %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ p.student.admission_number }}</td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-800">{{ p.student.name }}</td>
+                        <td class="py-3.5 px-4 text-xs text-slate-500">
+                            <div>{{ p.student.route.route_name|default:"-" }}</div>
+                            <div class="font-mono">{{ p.student.van.van_number|default:"" }}</div>
+                        </td>
+                        <td class="py-3.5 px-4 font-medium text-slate-800">{{ p.month }}</td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-900">Rs. {{ p.amount|floatformat:0 }}</td>
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                {% if p.status == 'Paid' %}bg-emerald-100 text-emerald-800
+                                {% else %}bg-amber-100 text-amber-800{% endif %}">
+                                {{ p.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center space-x-1">
+                            <!-- Voucher -->
+                            <a href="{% url 'finance:generate_voucher' p.pk %}" target="_blank"
+                               title="View / Print Fee Voucher with QR"
+                               class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium border border-blue-200">
+                                <i data-lucide="qr-code" class="w-3.5 h-3.5 mr-1"></i> Voucher
+                            </a>
+                            <!-- Challan -->
+                            <a href="{% url 'finance:generate_challan' p.pk %}" target="_blank"
+                               title="Generate / Print Bank Challan"
+                               class="inline-flex items-center px-2 py-1 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 text-xs font-medium border border-purple-200">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i> Challan
+                            </a>
+                            <!-- Receipt (if paid) -->
+                            {% if p.has_receipt %}
+                            <a href="{% url 'finance:print_receipt' p.receipt.pk %}" target="_blank"
+                               title="View Official Payment Receipt"
+                               class="inline-flex items-center px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-medium border border-emerald-200">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1"></i> Receipt
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            {% if p.status == 'Unpaid' %}
+                            <a href="{% url 'finance:mark_paid' p.pk %}"
+                               class="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+                                <i data-lucide="dollar-sign" class="w-3.5 h-3.5 mr-1"></i>
+                                Mark Paid
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-emerald-600 font-semibold inline-flex items-center">
+                                <i data-lucide="check" class="w-3.5 h-3.5 mr-1"></i> Settled
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-slate-400">No fee records found. Use "Generate Monthly Dues" above.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

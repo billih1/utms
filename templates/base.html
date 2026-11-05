@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TMS - University Transport Management System{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col text-slate-800" x-data="{ sidebarOpen: false }">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-primary-900 text-white shadow-md sticky top-0 z-30 no-print">
+        <div class="px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                {% if user.is_authenticated %}
+                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-primary-800 focus:outline-none">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                {% endif %}
+                <a href="{% url 'dashboard:home' %}" class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-400/30">
+                        <i data-lucide="bus" class="w-5 h-5 text-blue-300"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-tight text-white">UTMS</span>
+                        <span class="text-xs text-blue-200 hidden sm:inline ml-1.5 px-2 py-0.5 rounded-full bg-blue-800/60 border border-blue-700/50">GCUF Transport</span>
+                    </div>
+                </a>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="flex items-center space-x-4">
+                <div class="text-right hidden sm:block">
+                    <div class="text-sm font-semibold text-slate-100">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="text-xs text-blue-300 font-medium">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                            {% if user.role == 'Admin' %}bg-purple-900/60 text-purple-200 border border-purple-700
+                            {% elif user.role == 'Accountant' %}bg-emerald-900/60 text-emerald-200 border border-emerald-700
+                            {% elif user.role == 'Driver' %}bg-amber-900/60 text-amber-200 border border-amber-700
+                            {% else %}bg-blue-900/60 text-blue-200 border border-blue-700{% endif %}">
+                            {{ user.role }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <a href="{% url 'accounts:change_password' %}" title="Change Password" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-primary-800 transition">
+                        <i data-lucide="key" class="w-5 h-5"></i>
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" title="Sign Out" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600/80 hover:bg-red-600 text-white transition">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div>
+                <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition shadow-sm">
+                    Sign In
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        {% if user.is_authenticated %}
+        <!-- Sidebar Navigation -->
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+               class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 no-print shadow-sm">
+            <div class="flex-1 overflow-y-auto py-5 px-3.5 space-y-1 text-sm font-medium">
+
+                <!-- Universal / Dashboard -->
+                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2.5 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-slate-500"></i>
+                    Dashboard
+                </a>
+
+                {% if user.role == 'Admin' or user.is_superuser %}
+                <!-- Admin Navigation -->
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Transport Core</div>
+
+                <a href="{% url 'students:student_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="users" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Students
+                </a>
+                <a href="{% url 'transport:route_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Routes & Rent
+                </a>
+                <a href="{% url 'transport:van_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="bus" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Vans & Capacity
+                </a>
+
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Finance & Billing</div>
+                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Fee Management
+                </a>
+                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Generate Monthly Dues
+                </a>
+
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Analytics & AI</div>
+                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 font-semibold transition">
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
+                    AI Defaulter Predictor
+                </a>
+                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Collection Report
+                </a>
+                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
+                    Defaulter Report
+                </a>
+                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Remaining Dues
+                </a>
+
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Operations & Admin</div>
+                <a href="{% url 'operations:vehicle_log_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="clipboard-list" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Vehicle Entry Log
+                </a>
+                <a href="{% url 'accounts:user_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    User Accounts & RBAC
+                </a>
+
+                {% elif user.role == 'Accountant' %}
+                <!-- Accountant Navigation -->
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Fee Collection</div>
+                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Fee Records & Payments
+                </a>
+                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Generate Monthly Dues
+                </a>
+
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Reports & Insights</div>
+                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-lg text-purple-700 bg-purple-50 hover:bg-purple-100 font-semibold transition">
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
+                    AI Defaulter Predictor
+                </a>
+                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Collection Report
+                </a>
+                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
+                    Defaulter Report
+                </a>
+                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-500"></i>
+                    Remaining Dues
+                </a>
+
+                {% elif user.role == 'Driver' %}
+                <!-- Driver Navigation -->
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Driver Duty</div>
+                <a href="{% url 'operations:driver_panel' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="steering-wheel" class="w-4 h-4 mr-3 text-amber-600"></i>
+                    Driver Trip Panel
+                </a>
+
+                {% else %}
+                <!-- Student Navigation -->
+                <div class="pt-4 pb-1 px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">My Transport</div>
+                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2 rounded-lg text-slate-700 hover:bg-slate-100 transition">
+                    <i data-lucide="user" class="w-4 h-4 mr-3 text-blue-600"></i>
+                    My Route & Fee Status
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Footer in sidebar -->
+            <div class="p-4 border-t border-slate-100 text-xs text-slate-400">
+                <div>UTMS FYP 2026</div>
+                <div class="text-[11px] text-slate-400">GCUF Transport Office</div>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Main Content View Area -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <!-- Messages Banner -->
+            {% if messages %}
+            <div class="max-w-7xl mx-auto mb-6 space-y-2">
+                {% for message in messages %}
+                <div class="flex items-center justify-between p-4 rounded-xl shadow-sm text-sm font-medium
+                    {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
+                    {% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200
+                    {% elif message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+                    {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                    <div class="flex items-center space-x-2.5">
+                        <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="max-w-7xl mx-auto">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize all icons on load
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

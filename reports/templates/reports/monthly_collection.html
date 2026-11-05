@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Collection Report - UTMS{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Monthly Collection Report</h1>
+            <p class="text-sm text-slate-500">Route-wise revenue audit and pending balance breakdown (FR-16 / UC-14).</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="window.print()" class="inline-flex items-center px-3.5 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold shadow-sm bg-white">
+                <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Print
+            </button>
+            <a href="{% url 'reports:export_excel' %}?type=collection&month={{ selected_month }}"
+               class="inline-flex items-center px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-1.5"></i> Export Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Month Filter -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between no-print">
+        <form method="get" class="flex items-center space-x-3">
+            <label class="text-xs font-bold text-slate-600 uppercase">Select Billing Month:</label>
+            <select name="month" onchange="this.form.submit()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
+                {% for m in all_months %}
+                <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <span class="text-xs font-medium text-slate-400">Reporting Month: <strong class="text-slate-800">{{ selected_month }}</strong></span>
+    </div>
+
+    <!-- Collection Table (SRS Figure 18) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                    <tr>
+                        <th class="py-3.5 px-6">Route</th>
+                        <th class="py-3.5 px-6 text-center">Enrolled Students</th>
+                        <th class="py-3.5 px-6 text-right">Collected (PKR)</th>
+                        <th class="py-3.5 px-6 text-right">Remaining (PKR)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for row in report_rows %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3.5 px-6 font-semibold text-slate-900">{{ row.route.route_name }}</td>
+                        <td class="py-3.5 px-6 text-center">{{ row.student_count }}</td>
+                        <td class="py-3.5 px-6 text-right font-semibold text-emerald-600">Rs. {{ row.collected|floatformat:0 }}</td>
+                        <td class="py-3.5 px-6 text-right font-semibold text-amber-600">Rs. {{ row.remaining|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-slate-400">No collection recorded for {{ selected_month }}.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <!-- Total Row (Figure 18) -->
+                <tfoot class="bg-slate-100/80 border-t-2 border-slate-300 font-extrabold text-slate-900">
+                    <tr>
+                        <td class="py-4 px-6 text-xs uppercase tracking-wider">TOTAL</td>
+                        <td class="py-4 px-6 text-center">{{ total_students }}</td>
+                        <td class="py-4 px-6 text-right text-emerald-700 text-base">Rs. {{ total_collected|floatformat:0 }}</td>
+                        <td class="py-4 px-6 text-right text-amber-700 text-base">Rs. {{ total_remaining|floatformat:0 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Student Portal - UTMS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-3xl p-6 sm:p-8 text-white shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <span class="text-xs uppercase font-bold tracking-wider text-blue-200 bg-blue-900/40 px-3 py-1 rounded-full border border-blue-400/20">Student Transport Portal</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold mt-3">{{ student.name|default:user.username }}</h1>
+                <p class="text-sm text-blue-100 mt-1">Admission No: <span class="font-mono font-bold">{{ student.admission_number|default:"Not Linked" }}</span> &bull; {{ student.program|default:"N/A" }} ({{ student.semester|default:"-" }})</p>
+            </div>
+            <div class="text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                    {% if student.is_active %}bg-emerald-400/20 text-emerald-200 border border-emerald-400/30
+                    {% else %}bg-red-400/20 text-red-200 border border-red-400/30{% endif %}">
+                    {% if student.is_active %}Active Transport{% else %}Suspended{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Transport Allocation Summary (SRS Figure 19) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-blue-600/50">
+            <div>
+                <span class="text-xs text-blue-200">Allocated Route</span>
+                <div class="text-base font-bold mt-0.5">{{ student.route.route_name|default:"Not Assigned" }}</div>
+            </div>
+            <div>
+                <span class="text-xs text-blue-200">Allocated Van</span>
+                <div class="text-base font-bold mt-0.5">{{ student.van.van_number|default:"Not Assigned" }}</div>
+            </div>
+            <div>
+                <span class="text-xs text-blue-200">Monthly Fare</span>
+                <div class="text-base font-bold mt-0.5">Rs. {{ student.route.rent|floatformat:0|default:"0" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Status Table (SRS Figure 19) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-slate-900">Monthly Fee Status & Challans</h3>
+            <span class="text-xs text-slate-500">Official fee ledger</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 text-xs text-slate-400 uppercase font-semibold">
+                        <th class="py-3">Month</th>
+                        <th class="py-3">Dues</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3">Paid Date</th>
+                        <th class="py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for fee in fee_records %}
+                    <tr class="hover:bg-slate-50/60">
+                        <td class="py-3.5 font-semibold text-slate-900">{{ fee.month }}</td>
+                        <td class="py-3.5 font-medium">Rs. {{ fee.amount|floatformat:0 }}</td>
+                        <td class="py-3.5">
+                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                {% if fee.status == 'Paid' %}bg-emerald-100 text-emerald-800
+                                {% else %}bg-amber-100 text-amber-800{% endif %}">
+                                {{ fee.status }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 text-slate-500">
+                            {{ fee.paid_at|date:"d-M-Y"|default:"-" }}
+                        </td>
+                        <td class="py-3.5 text-right space-x-2">
+                            {% if fee.status == 'Unpaid' %}
+                                <a href="{% url 'finance:generate_challan' fee.pk %}" target="_blank"
+                                   class="inline-flex items-center px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition">
+                                    <i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i>
+                                    Download Challan
+                                </a>
+                            {% else %}
+                                {% if fee.has_receipt %}
+                                <a href="{% url 'finance:print_receipt' fee.receipt.pk %}" target="_blank"
+                                   class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i>
+                                    Receipt
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">
+                            No monthly dues generated yet. Please contact the Accounts Office.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

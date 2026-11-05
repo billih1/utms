@@ -1,0 +1,19 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import User
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'role', 'phone', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff', 'is_active')
+    fieldsets = UserAdmin.fieldsets + (
+        ('UTMS Role & Links', {
+            'fields': ('role', 'phone', 'linked_student_id', 'linked_driver_info')
+        }),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('UTMS Role & Links', {
+            'fields': ('role', 'phone', 'linked_student_id', 'linked_driver_info')
+        }),
+    )

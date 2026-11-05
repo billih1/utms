@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Receipt - {{ receipt.receipt_number }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-6 min-h-screen font-sans">
+    <div class="max-w-md mx-auto mb-4 no-print flex justify-between items-center">
+        <a href="{% url 'finance:fee_list' %}" class="text-xs font-semibold text-slate-600 hover:underline">&larr; Back to Fee List</a>
+        <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow">
+            Print Official Receipt
+        </button>
+    </div>
+
+    <!-- Receipt Sheet (SRS Figure 17) -->
+    <div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-300 shadow-lg">
+        <!-- University Header -->
+        <div class="text-center border-b pb-4 border-slate-200">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 tracking-wider">Official Payment Voucher</span>
+            <h1 class="text-xl font-extrabold text-slate-900 mt-2">GCUF TRANSPORT RECEIPT</h1>
+            <p class="text-xs text-slate-400 mt-0.5 font-mono">Receipt No: {{ receipt.receipt_number }}</p>
+        </div>
+
+        <div class="py-5 space-y-2.5 text-sm text-slate-700">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Payment Date:</span>
+                <span class="font-medium text-slate-900">{{ receipt.printed_at|date:"d-M-Y h:i A" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Received from:</span>
+                <span class="font-bold text-slate-900">{{ receipt.fee_payment.student.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Admission No:</span>
+                <span class="font-mono font-bold text-slate-900">{{ receipt.fee_payment.student.admission_number }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Route & Van:</span>
+                <span class="font-medium text-slate-900">{{ receipt.fee_payment.student.route.route_name|default:"-" }} ({{ receipt.fee_payment.student.van.van_number|default:"-" }})</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Billing Month:</span>
+                <span class="font-semibold text-slate-900">{{ receipt.fee_payment.month }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Settlement Status:</span>
+                <span class="font-bold text-emerald-700 uppercase">{{ receipt.fee_payment.status }}</span>
+            </div>
+            <div class="flex justify-between border-t border-slate-200 pt-3 text-base">
+                <span class="font-bold text-slate-900">Amount Paid:</span>
+                <span class="font-extrabold text-emerald-700">Rs. {{ receipt.fee_payment.amount_paid|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <!-- QR Code Verification Section (Figure 17) -->
+        <div class="mt-6 pt-4 border-t border-dashed border-slate-300 text-center">
+            {% if receipt.qr_image %}
+            <img src="{{ receipt.qr_image.url }}" alt="Receipt QR Code" class="w-36 h-36 mx-auto rounded-lg border border-slate-200 p-1 shadow-sm">
+            {% endif %}
+            <p class="text-[11px] font-mono text-slate-400 mt-2">scan to verify payment authenticity</p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-end text-[11px] text-slate-400">
+            <div>Student Copy</div>
+            <div>Cashier Signature</div>
+        </div>
+    </div>
+</body>
+</html>

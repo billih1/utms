@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - UTMS{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+    <div>
+        <span class="text-xs uppercase font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">Fee Settlement (UC-11)</span>
+        <h2 class="text-xl font-bold text-slate-900 mt-2">Record Fee Payment</h2>
+        <p class="text-xs text-slate-500 mt-1">Record bank / counter deposit for student <span class="font-bold text-slate-800">{{ payment.student.name }}</span> ({{ payment.student.admission_number }}).</p>
+    </div>
+
+    <!-- Payment details card -->
+    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2">
+        <div class="flex justify-between">
+            <span class="text-slate-500">Route & Fare:</span>
+            <span class="font-semibold text-slate-800">{{ payment.student.route.route_name|default:"-" }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-slate-500">Billing Month:</span>
+            <span class="font-bold text-slate-900">{{ payment.month }}</span>
+        </div>
+        <div class="flex justify-between border-t border-slate-200 pt-2 font-semibold">
+            <span class="text-slate-700">Total Dues:</span>
+            <span class="text-emerald-700 font-bold text-sm">Rs. {{ payment.amount|floatformat:0 }}</span>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Amount Paid (PKR)</label>
+            {{ form.amount_paid }}
+            {% if form.amount_paid.errors %}
+            <p class="text-xs text-red-600 mt-1">{{ form.amount_paid.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Reference / Notes</label>
+            {{ form.notes }}
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+            <a href="{% url 'finance:fee_list' %}" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold">Cancel</a>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm">
+                Confirm & Issue Receipt
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

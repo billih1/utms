@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Route & Van - {{ student.name }} - UTMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+    <div>
+        <span class="text-xs uppercase font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">Seat Capacity Control (FR-07 / UC-07)</span>
+        <h2 class="text-xl font-bold text-slate-900 mt-2">Assign Route & Van for {{ student.name }}</h2>
+        <p class="text-xs text-slate-500 mt-1">Select the student's daily commute route and vehicle. Capacity is automatically enforced.</p>
+    </div>
+
+    <!-- Van Fleet Capacity Indicators -->
+    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <h4 class="text-xs font-bold text-slate-600 uppercase mb-2">Current Van Fleet Occupancy</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+            {% for v in vans %}
+            <div class="p-2.5 rounded-lg border {% if v.is_full %}bg-red-50 border-red-200 text-red-800{% else %}bg-white border-slate-200 text-slate-700{% endif %}">
+                <div class="font-mono font-bold">{{ v.van_number }}</div>
+                <div class="text-[11px] text-slate-500">{{ v.route.route_name|default:"Spare" }}</div>
+                <div class="mt-1 font-semibold {% if v.is_full %}text-red-700{% else %}text-emerald-700{% endif %}">
+                    {{ v.filled_seats }}/{{ v.capacity }} seats {% if v.is_full %}(FULL){% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl">
+            {% for err in form.non_field_errors %}
+            <p>{{ err }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Route</label>
+            {{ form.route }}
+            {% if form.route.errors %}
+            <p class="text-xs text-red-600 mt-1">{{ form.route.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Van / Spare Vehicle</label>
+            {{ form.van }}
+            {% if form.van.errors %}
+            <p class="text-xs text-red-600 mt-1">{{ form.van.errors.0 }}</p>
+            {% endif %}
+            <p class="text-[11px] text-slate-400 mt-1">If the primary van is full, assign an available spare vehicle.</p>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+            <a href="{% url 'students:student_detail' student.pk %}" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold">Cancel</a>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm">Save Assignment</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

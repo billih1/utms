@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - UTMS{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">System Users & RBAC</h1>
+            <p class="text-sm text-slate-500">Manage user accounts and role assignments (Admin, Accountant, Driver, Student).</p>
+        </div>
+        <a href="{% url 'accounts:user_create' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+            Create User
+        </a>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search username, email, phone..."
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <select name="role" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="">All Roles</option>
+                    {% for r_val, r_label in roles %}
+                    <option value="{{ r_val }}" {% if role_filter == r_val %}selected{% endif %}>{{ r_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button type="submit" class="w-full py-2 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold">Filter</button>
+                {% if query or role_filter %}
+                <a href="{% url 'accounts:user_list' %}" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 text-sm">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                    <tr>
+                        <th class="py-3 px-4">Username</th>
+                        <th class="py-3 px-4">Role</th>
+                        <th class="py-3 px-4">Email / Phone</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for u in users %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3 px-4 font-semibold text-slate-900">
+                            {{ u.username }}
+                            {% if u == request.user %}<span class="text-xs text-blue-600 font-normal ml-1">(You)</span>{% endif %}
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold
+                                {% if u.role == 'Admin' %}bg-purple-100 text-purple-800
+                                {% elif u.role == 'Accountant' %}bg-emerald-100 text-emerald-800
+                                {% elif u.role == 'Driver' %}bg-amber-100 text-amber-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ u.role }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-500">{{ u.email|default:u.phone|default:"-" }}</td>
+                        <td class="py-3 px-4">
+                            {% if u.is_active %}
+                            <span class="inline-flex items-center text-xs text-emerald-600 font-medium">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Active
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center text-xs text-slate-400 font-medium">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 mr-1.5"></span>Disabled
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right space-x-2">
+                            <a href="{% url 'accounts:user_edit' u.pk %}" class="text-xs font-semibold text-blue-600 hover:underline">Edit</a>
+                            <a href="{% url 'accounts:reset_password' u.pk %}" class="text-xs font-semibold text-slate-600 hover:underline">Reset Pwd</a>
+                            {% if u != request.user %}
+                            <a href="{% url 'accounts:user_delete' u.pk %}" class="text-xs font-semibold text-red-600 hover:underline">Delete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">No users found matching query.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

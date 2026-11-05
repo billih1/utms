@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Delete Student - UTMS{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-2xl border border-red-200 shadow-sm space-y-6 text-center">
+    <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+    </div>
+    <div>
+        <h2 class="text-xl font-bold text-slate-900">Delete Student Record?</h2>
+        <p class="text-sm text-slate-500 mt-2">Are you sure you want to permanently delete student <span class="font-bold text-slate-800">{{ student.name }}</span> (Adm No: {{ student.admission_number }})?</p>
+    </div>
+
+    <form method="post" class="flex items-center justify-center space-x-3 pt-4">
+        {% csrf_token %}
+        <a href="{% url 'students:student_list' %}" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold">Cancel</a>
+        <button type="submit" class="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-sm">Confirm Delete</button>
+    </form>
+</div>
+{% endblock %}

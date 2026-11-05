@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Challan - {{ challan.challan_number }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+            @page { size: landscape; margin: 10mm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-6 min-h-screen font-sans">
+    <div class="max-w-6xl mx-auto mb-4 no-print flex justify-between items-center">
+        <a href="{% url 'finance:fee_list' %}" class="text-xs font-semibold text-slate-600 hover:underline">&larr; Back to Fee List</a>
+        <button onclick="window.print()" class="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-lg text-xs font-bold shadow">
+            Print 3-Part Challan
+        </button>
+    </div>
+
+    <!-- 3 Copies (Bank | Office | Student) - Figure 17 -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Reusable Challan Card Macro -->
+        {% for copy_name in "Bank Copy,Accounts Copy,Student Copy"|make_list|slice:":3" %}
+        {% endfor %}
+
+        <!-- Copy 1: Bank Copy -->
+        <div class="bg-white p-6 rounded-xl border border-slate-300 shadow text-xs space-y-3 relative">
+            <div class="text-center border-b pb-3 border-slate-200">
+                <span class="inline-block px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold text-[10px] uppercase">Bank Copy</span>
+                <h3 class="font-extrabold text-sm text-slate-900 mt-1">GCUF TRANSPORT FEE</h3>
+                <p class="font-mono text-slate-500 text-[11px] mt-0.5">Challan No: {{ challan.challan_number }}</p>
+            </div>
+            <div class="space-y-1.5 text-slate-700">
+                <div class="flex justify-between"><span>Bank/Office:</span><span class="font-bold">{{ challan.bank_office_ref }}</span></div>
+                <div class="flex justify-between"><span>Issue Date:</span><span>{{ challan.issue_date }}</span></div>
+                <div class="flex justify-between"><span>Student Name:</span><span class="font-semibold">{{ challan.fee_payment.student.name }}</span></div>
+                <div class="flex justify-between"><span>Adm No:</span><span class="font-mono font-bold">{{ challan.fee_payment.student.admission_number }}</span></div>
+                <div class="flex justify-between"><span>Route / Van:</span><span>{{ challan.fee_payment.student.route.route_name|default:"-" }} / {{ challan.fee_payment.student.van.van_number|default:"-" }}</span></div>
+                <div class="flex justify-between"><span>Month:</span><span class="font-bold">{{ challan.fee_payment.month }}</span></div>
+                <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-bold">
+                    <span>Payable Amount:</span>
+                    <span class="text-purple-700">Rs. {{ challan.fee_payment.amount|floatformat:0 }}</span>
+                </div>
+            </div>
+            <div class="pt-8 flex justify-between text-[10px] text-slate-400 border-t border-slate-100">
+                <div>Depositor Sign</div>
+                <div>Cashier Stamp</div>
+            </div>
+        </div>
+
+        <!-- Copy 2: Accounts Office Copy -->
+        <div class="bg-white p-6 rounded-xl border border-slate-300 shadow text-xs space-y-3 relative">
+            <div class="text-center border-b pb-3 border-slate-200">
+                <span class="inline-block px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold text-[10px] uppercase">Accounts Copy</span>
+                <h3 class="font-extrabold text-sm text-slate-900 mt-1">GCUF TRANSPORT FEE</h3>
+                <p class="font-mono text-slate-500 text-[11px] mt-0.5">Challan No: {{ challan.challan_number }}</p>
+            </div>
+            <div class="space-y-1.5 text-slate-700">
+                <div class="flex justify-between"><span>Bank/Office:</span><span class="font-bold">{{ challan.bank_office_ref }}</span></div>
+                <div class="flex justify-between"><span>Issue Date:</span><span>{{ challan.issue_date }}</span></div>
+                <div class="flex justify-between"><span>Student Name:</span><span class="font-semibold">{{ challan.fee_payment.student.name }}</span></div>
+                <div class="flex justify-between"><span>Adm No:</span><span class="font-mono font-bold">{{ challan.fee_payment.student.admission_number }}</span></div>
+                <div class="flex justify-between"><span>Route / Van:</span><span>{{ challan.fee_payment.student.route.route_name|default:"-" }} / {{ challan.fee_payment.student.van.van_number|default:"-" }}</span></div>
+                <div class="flex justify-between"><span>Month:</span><span class="font-bold">{{ challan.fee_payment.month }}</span></div>
+                <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-bold">
+                    <span>Payable Amount:</span>
+                    <span class="text-blue-700">Rs. {{ challan.fee_payment.amount|floatformat:0 }}</span>
+                </div>
+            </div>
+            <div class="pt-8 flex justify-between text-[10px] text-slate-400 border-t border-slate-100">
+                <div>Depositor Sign</div>
+                <div>Cashier Stamp</div>
+            </div>
+        </div>
+
+        <!-- Copy 3: Student Copy -->
+        <div class="bg-white p-6 rounded-xl border border-slate-300 shadow text-xs space-y-3 relative">
+            <div class="text-center border-b pb-3 border-slate-200">
+                <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase">Student Copy</span>
+                <h3 class="font-extrabold text-sm text-slate-900 mt-1">GCUF TRANSPORT FEE</h3>
+                <p class="font-mono text-slate-500 text-[11px] mt-0.5">Challan No: {{ challan.challan_number }}</p>
+            </div>
+            <div class="space-y-1.5 text-slate-700">
+                <div class="flex justify-between"><span>Bank/Office:</span><span class="font-bold">{{ challan.bank_office_ref }}</span></div>
+                <div class="flex justify-between"><span>Issue Date:</span><span>{{ challan.issue_date }}</span></div>
+                <div class="flex justify-between"><span>Student Name:</span><span class="font-semibold">{{ challan.fee_payment.student.name }}</span></div>
+                <div class="flex justify-between"><span>Adm No:</span><span class="font-mono font-bold">{{ challan.fee_payment.student.admission_number }}</span></div>
+                <div class="flex justify-between"><span>Route / Van:</span><span>{{ challan.fee_payment.student.route.route_name|default:"-" }} / {{ challan.fee_payment.student.van.van_number|default:"-" }}</span></div>
+                <div class="flex justify-between"><span>Month:</span><span class="font-bold">{{ challan.fee_payment.month }}</span></div>
+                <div class="flex justify-between border-t border-slate-200 pt-2 text-sm font-bold">
+                    <span>Payable Amount:</span>
+                    <span class="text-emerald-700">Rs. {{ challan.fee_payment.amount|floatformat:0 }}</span>
+                </div>
+            </div>
+            <div class="pt-8 flex justify-between text-[10px] text-slate-400 border-t border-slate-100">
+                <div>Depositor Sign</div>
+                <div>Cashier Stamp</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

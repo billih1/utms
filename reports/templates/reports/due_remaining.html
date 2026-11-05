@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Due Remaining Report - UTMS{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Remaining Due Amount Report</h1>
+            <p class="text-sm text-slate-500">Unsettled fees per student and route for {{ selected_month }} (FR-17 / UC-15).</p>
+        </div>
+        <button onclick="window.print()" class="inline-flex items-center px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold shadow-sm bg-white">
+            <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Print Report
+        </button>
+    </div>
+
+    <!-- Month Filter -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between no-print">
+        <form method="get" class="flex items-center space-x-3">
+            <label class="text-xs font-bold text-slate-600 uppercase">Billing Month:</label>
+            <select name="month" onchange="this.form.submit()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
+                {% for m in all_months %}
+                <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <span class="text-xs font-medium text-slate-400">Total Outstanding: <strong class="text-amber-600 text-sm">Rs. {{ total_due|floatformat:0 }}</strong></span>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-semibold">
+                    <tr>
+                        <th class="py-3 px-4">Adm No</th>
+                        <th class="py-3 px-4">Student Name</th>
+                        <th class="py-3 px-4">Program</th>
+                        <th class="py-3 px-4">Route</th>
+                        <th class="py-3 px-4">Van</th>
+                        <th class="py-3 px-4 text-right">Remaining Due</th>
+                        <th class="py-3 px-4 text-right no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for d in dues %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ d.student.admission_number }}</td>
+                        <td class="py-3 px-4 font-semibold">{{ d.student.name }}</td>
+                        <td class="py-3 px-4">{{ d.student.program }} ({{ d.student.semester }})</td>
+                        <td class="py-3 px-4 text-slate-600">{{ d.student.route.route_name|default:"-" }}</td>
+                        <td class="py-3 px-4 font-mono">{{ d.student.van.van_number|default:"-" }}</td>
+                        <td class="py-3 px-4 text-right font-semibold text-amber-600">Rs. {{ d.remaining_amount|floatformat:0 }}</td>
+                        <td class="py-3 px-4 text-right no-print">
+                            <a href="{% url 'finance:mark_paid' d.pk %}" class="text-xs font-semibold text-emerald-600 hover:underline">Record Payment</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-slate-400">All student transport fees are settled for this month!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
