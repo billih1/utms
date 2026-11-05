@@ -1,89 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Student Portal - UTMS{% endblock %}
+{% block title %}Student Transport Pass • GCUF Transport{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-3xl p-6 sm:p-8 text-white shadow-md">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <span class="text-xs uppercase font-bold tracking-wider text-blue-200 bg-blue-900/40 px-3 py-1 rounded-full border border-blue-400/20">Student Transport Portal</span>
-                <h1 class="text-2xl sm:text-3xl font-extrabold mt-3">{{ student.name|default:user.username }}</h1>
-                <p class="text-sm text-blue-100 mt-1">Admission No: <span class="font-mono font-bold">{{ student.admission_number|default:"Not Linked" }}</span> &bull; {{ student.program|default:"N/A" }} ({{ student.semester|default:"-" }})</p>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+
+    <!-- Hero Card: Student Transport Pass -->
+    <div class="bise-hero-gradient text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden border border-blue-400/20">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.35),transparent_50%)]"></div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div class="space-y-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-200 border border-blue-400/30">
+                    GCUF Transport Pass
+                </span>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">{{ student.name|default:user.username }}</h1>
+                <p class="text-xs sm:text-sm text-blue-100">
+                    Admission #: <span class="font-mono font-bold text-white">{{ student.admission_number|default:"Not Linked" }}</span> &bull; {{ student.program|default:"N/A" }} (Semester {{ student.semester|default:"-" }})
+                </p>
             </div>
-            <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
-                    {% if student.is_active %}bg-emerald-400/20 text-emerald-200 border border-emerald-400/30
-                    {% else %}bg-red-400/20 text-red-200 border border-red-400/30{% endif %}">
-                    {% if student.is_active %}Active Transport{% else %}Suspended{% endif %}
+            <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                    {% if student.is_active %}bg-emerald-400/20 text-emerald-200 border border-emerald-400/40
+                    {% else %}bg-rose-400/20 text-rose-200 border border-rose-400/40{% endif %}">
+                    <span class="w-2 h-2 rounded-full mr-1.5 {% if student.is_active %}bg-emerald-400 animate-pulse{% else %}bg-rose-400{% endif %}"></span>
+                    {% if student.is_active %}Active Transport Pass{% else %}Pass Suspended{% endif %}
                 </span>
             </div>
         </div>
 
-        <!-- Transport Allocation Summary (SRS Figure 19) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-blue-600/50">
-            <div>
-                <span class="text-xs text-blue-200">Allocated Route</span>
-                <div class="text-base font-bold mt-0.5">{{ student.route.route_name|default:"Not Assigned" }}</div>
+        <!-- Allocation Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-blue-400/30 relative z-10">
+            <div class="bg-blue-900/40 p-4 rounded-2xl border border-blue-400/20">
+                <span class="text-[11px] text-blue-200 uppercase font-semibold">Allocated Route</span>
+                <div class="text-base font-bold text-white mt-0.5">{{ student.route.route_name|default:"Not Assigned" }}</div>
             </div>
-            <div>
-                <span class="text-xs text-blue-200">Allocated Van</span>
-                <div class="text-base font-bold mt-0.5">{{ student.van.van_number|default:"Not Assigned" }}</div>
+            <div class="bg-blue-900/40 p-4 rounded-2xl border border-blue-400/20">
+                <span class="text-[11px] text-blue-200 uppercase font-semibold">Allocated Van</span>
+                <div class="text-base font-bold text-white mt-0.5">{{ student.van.van_number|default:"Not Assigned" }}</div>
             </div>
-            <div>
-                <span class="text-xs text-blue-200">Monthly Fare</span>
-                <div class="text-base font-bold mt-0.5">Rs. {{ student.route.rent|floatformat:0|default:"0" }}</div>
+            <div class="bg-blue-900/40 p-4 rounded-2xl border border-blue-400/20">
+                <span class="text-[11px] text-blue-200 uppercase font-semibold">Monthly Fare</span>
+                <div class="text-base font-bold text-white mt-0.5">Rs. {{ student.route.rent|floatformat:0|default:"0" }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Fee Status Table (SRS Figure 19) -->
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+    <!-- Monthly Fee Ledger & Challan Downloads -->
+    <div class="bise-card p-6 sm:p-8">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-slate-900">Monthly Fee Status & Challans</h3>
-            <span class="text-xs text-slate-500">Official fee ledger</span>
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-700">STUDENT FEE LEDGER</span>
+                <h3 class="text-lg font-bold text-slate-900 tracking-tight">Monthly Fee Status &amp; Bank Challans</h3>
+                <p class="text-xs text-slate-500">Download standardized 3-part bank deposit slips for National Bank of Pakistan (NBP)</p>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-xs">
                 <thead>
-                    <tr class="border-b border-slate-200 text-xs text-slate-400 uppercase font-semibold">
-                        <th class="py-3">Month</th>
-                        <th class="py-3">Dues</th>
-                        <th class="py-3">Status</th>
-                        <th class="py-3">Paid Date</th>
-                        <th class="py-3 text-right">Actions</th>
+                    <tr class="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider rounded-xl">
+                        <th class="py-2.5 px-3 rounded-l-xl">Billing Month</th>
+                        <th class="py-2.5 px-3">Monthly Fare</th>
+                        <th class="py-2.5 px-3">Payment Status</th>
+                        <th class="py-2.5 px-3">Paid Date</th>
+                        <th class="py-2.5 px-3 text-right rounded-r-xl">Document / Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
                     {% for fee in fee_records %}
-                    <tr class="hover:bg-slate-50/60">
-                        <td class="py-3.5 font-semibold text-slate-900">{{ fee.month }}</td>
-                        <td class="py-3.5 font-medium">Rs. {{ fee.amount|floatformat:0 }}</td>
-                        <td class="py-3.5">
-                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold
+                    <tr class="hover:bg-blue-50/50 transition">
+                        <td class="py-3.5 px-3 font-bold text-slate-900">{{ fee.month }}</td>
+                        <td class="py-3.5 px-3 font-extrabold text-slate-900">Rs. {{ fee.amount|floatformat:0 }}</td>
+                        <td class="py-3.5 px-3">
+                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold
                                 {% if fee.status == 'Paid' %}bg-emerald-100 text-emerald-800
                                 {% else %}bg-amber-100 text-amber-800{% endif %}">
                                 {{ fee.status }}
                             </span>
                         </td>
-                        <td class="py-3.5 text-slate-500">
-                            {{ fee.paid_at|date:"d-M-Y"|default:"-" }}
+                        <td class="py-3.5 px-3 text-slate-500">
+                            {{ fee.paid_at|date:"d M Y"|default:"-" }}
                         </td>
-                        <td class="py-3.5 text-right space-x-2">
+                        <td class="py-3.5 px-3 text-right space-x-2">
                             {% if fee.status == 'Unpaid' %}
                                 <a href="{% url 'finance:generate_challan' fee.pk %}" target="_blank"
-                                   class="inline-flex items-center px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition">
-                                    <i data-lucide="download" class="w-3.5 h-3.5 mr-1"></i>
+                                   class="bise-btn-primary inline-flex items-center px-3.5 py-1.5 text-xs font-semibold">
+                                    <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i>
                                     Download Challan
                                 </a>
                             {% else %}
                                 {% if fee.has_receipt %}
                                 <a href="{% url 'finance:print_receipt' fee.receipt.pk %}" target="_blank"
-                                   class="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
-                                    <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i>
-                                    Receipt
+                                   class="inline-flex items-center px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition border border-slate-200">
+                                    <i data-lucide="receipt" class="w-3.5 h-3.5 mr-1.5 text-slate-600"></i>
+                                    Official Receipt
                                 </a>
                                 {% endif %}
                             {% endif %}
@@ -100,5 +111,6 @@
             </table>
         </div>
     </div>
+
 </div>
 {% endblock %}

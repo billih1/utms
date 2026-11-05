@@ -1,165 +1,436 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - UTMS{% endblock %}
+{% block title %}Admin Dashboard • GCUF Transport Directorate{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
-            <p class="text-sm text-slate-500">System overview, transport stats, and financial activity for {{ current_month }}.</p>
-        </div>
-        <div class="flex items-center space-x-3">
-            <a href="{% url 'students:student_create' %}" class="inline-flex items-center px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
-                Add Student
-            </a>
-            <a href="{% url 'finance:generate_dues' %}" class="inline-flex items-center px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition shadow-sm">
-                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>
-                Generate Dues
-            </a>
-        </div>
-    </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
 
-    <!-- 4 Stats Cards (Figure 13 in SRS) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Total Students -->
-        <div class="card-3d bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Enrolled</p>
-                <h3 class="text-3xl font-extrabold text-slate-900 mt-1">{{ total_students }}</h3>
-                <p class="text-xs text-blue-600 font-medium mt-1">Active transport passengers</p>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
-                <i data-lucide="users" class="w-6 h-6"></i>
-            </div>
-        </div>
+    <!-- BISE Lahore Style Hero Banner -->
+    <div class="bise-hero-gradient text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden border border-blue-400/20">
+        <!-- Ambient Radial Lighting (Exact from BISE Lahore) -->
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.35),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(37,99,235,0.25),transparent_40%)]"></div>
 
-        <!-- Total Vans -->
-        <div class="card-3d bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Vans</p>
-                <h3 class="text-3xl font-extrabold text-slate-900 mt-1">{{ total_vans }}</h3>
-                <p class="text-xs text-emerald-600 font-medium mt-1">Across {{ total_routes }} routes</p>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
-                <i data-lucide="bus" class="w-6 h-6"></i>
-            </div>
-        </div>
-
-        <!-- Collected Amount -->
-        <div class="card-3d bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Collected ({{ current_month }})</p>
-                <h3 class="text-3xl font-extrabold text-slate-900 mt-1">Rs. {{ collected_amount|floatformat:0 }}</h3>
-                <p class="text-xs text-emerald-600 font-medium mt-1">Settled in bank / office</p>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
-                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
-            </div>
-        </div>
-
-        <!-- Due Amount -->
-        <div class="card-3d bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Due ({{ current_month }})</p>
-                <h3 class="text-3xl font-extrabold text-amber-600 mt-1">Rs. {{ due_amount|floatformat:0 }}</h3>
-                <p class="text-xs text-amber-600 font-medium mt-1">Pending payments</p>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shadow-sm">
-                <i data-lucide="alert-circle" class="w-6 h-6"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Two Columns: Collection Chart & Defaulters Table (SRS Figure 13) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Monthly Collection Chart -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-slate-900">Monthly Transport Collection</h3>
-                <span class="text-xs text-slate-400">Current Year</span>
-            </div>
-            <div class="h-64 relative flex items-center justify-center">
-                <canvas id="collectionChart"></canvas>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Updated in real-time</span>
-                <a href="{% url 'reports:monthly_collection' %}" class="text-blue-600 font-semibold hover:underline">Full Collection Report →</a>
-            </div>
-        </div>
-
-        <!-- Recent Defaulters Table -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-slate-900">Recent Defaulters ({{ current_month }})</h3>
-                <a href="{% url 'reports:defaulter_report' %}" class="text-xs font-semibold text-blue-600 hover:underline">View All Defaulters</a>
+        <div class="relative z-10 max-w-3xl space-y-4">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-200 border border-blue-400/30">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span>Fleet Operations &bull; Directorate of Transport</span>
             </div>
 
-            <div class="overflow-x-auto flex-1">
-                <table class="w-full text-left text-sm">
-                    <thead>
-                        <tr class="border-b border-slate-200 text-xs text-slate-400 uppercase font-semibold">
-                            <th class="py-2.5">Adm No</th>
-                            <th class="py-2.5">Name</th>
-                            <th class="py-2.5">Route</th>
-                            <th class="py-2.5 text-right">Due (PKR)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-slate-700">
-                        {% for d in defaulters %}
-                        <tr class="hover:bg-slate-50/60">
-                            <td class="py-3 font-mono font-medium text-slate-900">{{ d.student.admission_number }}</td>
-                            <td class="py-3 font-medium">{{ d.student.name }}</td>
-                            <td class="py-3 text-slate-500">{{ d.student.route.route_name|default:"-" }}</td>
-                            <td class="py-3 text-right font-semibold text-amber-600">Rs. {{ d.amount|floatformat:0 }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="py-8 text-center text-slate-400">
-                                <i data-lucide="check-check" class="w-8 h-8 mx-auto text-emerald-400 mb-2"></i>
-                                No defaulters recorded for this month!
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                Welcome back, {{ user.get_full_name|default:user.username }}
+            </h1>
 
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <a href="{% url 'ai_predictor:insights' %}" class="inline-flex items-center text-xs font-semibold text-purple-700 hover:text-purple-900">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1 text-purple-600"></i>
-                    Run AI Defaulter Risk Analysis →
+            <p class="text-sm sm:text-base text-blue-100/90 leading-relaxed font-normal">
+                Oversee university fleet operations, seat allocations (20–22 capacity guard), monthly dues reconciliation with National Bank of Pakistan (NBP), and Scikit-Learn AI defaulter risk predictions for <span class="font-bold text-white">{{ current_month }}</span>.
+            </p>
+
+            <!-- BISE Lahore Action Buttons -->
+            <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                <a href="{% url 'students:student_create' %}" class="bise-btn-primary inline-flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                    <span>Add New Student</span>
+                </a>
+
+                <a href="{% url 'finance:generate_dues' %}" class="bise-btn-glass inline-flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-2"></i>
+                    <span>Generate Monthly Dues</span>
+                </a>
+
+                <a href="{% url 'ai_predictor:insights' %}" class="bise-btn-glass inline-flex items-center px-6 py-3.5 text-sm font-semibold text-purple-200 border-purple-400/40 hover:border-purple-300">
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-2 text-purple-400"></i>
+                    <span>Run AI Defaulter Scan</span>
                 </a>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
+    <!-- Section: 4 3D Elevated Cards (BISE Lahore "Online Systems" Style) -->
+    <div>
+        <div class="mb-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-700">EXPLORE FLEET METRICS</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Transport Key Indicators</h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Real-time status updates across passengers, vehicles, and fee collections.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <!-- Card 1: Total Enrolled -->
+            <div class="bise-card p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-blue-50 text-blue-700 border border-blue-200">
+                            Active Roster
+                        </span>
+                        <div class="w-10 h-10 rounded-2xl bg-blue-100/80 flex items-center justify-center text-blue-700">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{{ total_students }}</h3>
+                    <h4 class="text-sm font-bold text-slate-700 mt-1">Total Enrolled Students</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Active passengers with assigned routes &amp; vans.</p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
+                    <a href="{% url 'students:student_list' %}" class="hover:underline flex items-center">
+                        <span>View Students Roster</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: Active Vans -->
+            <div class="bise-card p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Fleet Ready
+                        </span>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100/80 flex items-center justify-center text-emerald-700">
+                            <i data-lucide="bus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{{ total_vans }}</h3>
+                    <h4 class="text-sm font-bold text-slate-700 mt-1">Active Transport Vans</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Operating across {{ total_routes }} routes with 20–22 seats.</p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
+                    <a href="{% url 'transport:van_list' %}" class="hover:underline flex items-center">
+                        <span>Check Capacity &amp; Spares</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Collected (Current Month) -->
+            <div class="bise-card p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Bank Reconciled
+                        </span>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100/80 flex items-center justify-center text-emerald-700">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">Rs. {{ collected_amount|floatformat:0 }}</h3>
+                    <h4 class="text-sm font-bold text-slate-700 mt-1">Collected ({{ current_month }})</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Deposited into NBP transport bank account.</p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
+                    <a href="{% url 'reports:monthly_collection' %}" class="hover:underline flex items-center">
+                        <span>Full Collection Report</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 4: Pending Dues -->
+            <div class="bise-card p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200">
+                            Action Required
+                        </span>
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100/80 flex items-center justify-center text-amber-700">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-amber-600 tracking-tight">Rs. {{ due_amount|floatformat:0 }}</h3>
+                    <h4 class="text-sm font-bold text-slate-700 mt-1">Outstanding Dues</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">Unsubmitted challans for {{ current_month }}.</p>
+                </div>
+                <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-600">
+                    <a href="{% url 'reports:defaulter_report' %}" class="hover:underline flex items-center">
+                        <span>Inspect Defaulter Queue</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Analytics & Operation Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Monthly Transport Collection Chart Card -->
+        <div class="bise-card p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-700">FINANCIAL OVERVIEW</span>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Monthly Transport Collection</h3>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                        Fiscal Year 2026
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mb-4">Reconciled monthly collection totals deposited into NBP account.</p>
+            </div>
+
+            <div class="h-64 sm:h-72 relative my-2 flex items-center justify-center">
+                <canvas id="collectionChart"></canvas>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-slate-500">
+                <span class="flex items-center">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i> Verified with Bank Ledgers
+                </span>
+                <a href="{% url 'reports:monthly_collection' %}" class="text-blue-600 font-bold hover:underline flex items-center">
+                    <span>Export Collection Excel</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Defaulters Monitoring Card -->
+        <div class="bise-card p-6 sm:p-7 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">ARREARS AUDIT</span>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Defaulter Queue ({{ current_month }})</h3>
+                    </div>
+                    <a href="{% url 'reports:defaulter_report' %}" class="text-xs font-bold text-blue-600 hover:underline">
+                        View All Defaulters &rarr;
+                    </a>
+                </div>
+                <p class="text-xs text-slate-500 mb-4">Students with unsubmitted fees for current billing cycle.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider rounded-xl">
+                                <th class="py-2.5 px-3 rounded-l-xl">Student</th>
+                                <th class="py-2.5 px-3">Route</th>
+                                <th class="py-2.5 px-3 text-right">Outstanding</th>
+                                <th class="py-2.5 px-3 text-right rounded-r-xl">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
+                            {% for d in defaulters %}
+                            <tr class="hover:bg-blue-50/50 transition">
+                                <td class="py-3 px-3">
+                                    <div class="font-bold text-slate-900">{{ d.student.name }}</div>
+                                    <div class="font-mono text-[11px] text-slate-500">{{ d.student.admission_number }}</div>
+                                </td>
+                                <td class="py-3 px-3">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700">
+                                        {{ d.student.route.route_name|default:"Unassigned" }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-right font-extrabold text-amber-600">
+                                    Rs. {{ d.amount|floatformat:0 }}
+                                </td>
+                                <td class="py-3 px-3 text-right">
+                                    <a href="{% url 'finance:mark_paid' d.pk %}"
+                                       class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition shadow-sm">
+                                        Record
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-10 text-center text-slate-400">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+                                        <i data-lucide="check-check" class="w-6 h-6"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-800 text-sm">No Outstanding Defaulters!</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">All dues cleared for {{ current_month }}.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                <a href="{% url 'ai_predictor:insights' %}"
+                   class="inline-flex items-center space-x-2 text-xs font-bold text-purple-700 hover:text-purple-900 group">
+                    <div class="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700 group-hover:scale-105 transition">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    <span>Launch AI Logistic Regression Defaulter Predictor &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Access E-Services Grid (Directly Inspired by BISE Lahore E-Services Section) -->
+    <div>
+        <div class="mb-5">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-700">PORTAL MODULES</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">University E-Services</h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Direct access to administrative, financial, and fleet dispatch functions.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- E-Service 1: Bulk Challans -->
+            <a href="{% url 'finance:bulk_print_challans' %}" target="_blank"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-blue-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="printer" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-blue-700 transition">Bulk 3-Part Challans</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Print standardized NBP bank deposit slips with QR codes in one continuous batch.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-blue-600 mt-2.5">
+                        <span>Open Print Batch</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- E-Service 2: Bulk Vouchers -->
+            <a href="{% url 'finance:bulk_print_vouchers' %}" target="_blank"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-blue-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-blue-700 transition">Bulk Fee Vouchers</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Issue individual student transport fee vouchers with embedded verification QR code.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-blue-600 mt-2.5">
+                        <span>Open Voucher Batch</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- E-Service 3: Import Student Roster -->
+            <a href="{% url 'students:student_import' %}"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-blue-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="file-up" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-blue-700 transition">Import Students Roster</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Upload CSV or Excel (.xlsx) files to automatically import or update student registrations.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-emerald-600 mt-2.5">
+                        <span>Upload Spreadsheet</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- E-Service 4: Vehicle Entry Log -->
+            <a href="{% url 'operations:vehicle_log_list' %}"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-blue-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-blue-700 transition">Vehicle Entry Log</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Monitor campus gate entry/exit timestamps and driver duty operational statuses.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-amber-600 mt-2.5">
+                        <span>Inspect Gate Logs</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- E-Service 5: Routes & Van Allocation -->
+            <a href="{% url 'transport:route_list' %}"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-blue-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="map-pin" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-blue-700 transition">Routes &amp; Fare Tables</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Configure designated university routes, monthly fares, and pick-up stops.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-sky-600 mt-2.5">
+                        <span>Manage Routes</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- E-Service 6: AI Defaulter Predictor -->
+            <a href="{% url 'ai_predictor:insights' %}"
+               class="bise-card p-6 flex items-start space-x-4 hover:border-purple-400 group">
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0 group-hover:scale-110 transition transform">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-900 group-hover:text-purple-700 transition">AI Defaulter Predictor</h4>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">Machine learning model classifying High (≥70%), Medium, and Low risk students.</p>
+                    <span class="inline-flex items-center text-xs font-bold text-purple-600 mt-2.5">
+                        <span>Launch ML Scanner</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                    </span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Configuration -->
 <script>
-    const ctx = document.getElementById('collectionChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
-            datasets: [{
-                label: 'Collection (Rs. in Thousands)',
-                data: [650, 720, 840, 790, 920, {{ collected_amount|default:850 }} / 1000],
-                backgroundColor: 'rgba(29, 78, 216, 0.85)',
-                borderRadius: 8,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                x: { grid: { display: false } }
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('collectionChart');
+        if (ctx) {
+            const chartMonths = {{ chart_months|safe|default:"[]" }};
+            const chartData = {{ chart_data|safe|default:"[]" }};
+
+            const labels = chartMonths.length ? chartMonths : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dataValues = chartData.length ? chartData : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, {{ collected_amount|default:0 }}, 0];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Fee Collected (PKR)',
+                        data: dataValues,
+                        backgroundColor: '#1f6df2',
+                        hoverBackgroundColor: '#0b4ea8',
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        maxBarThickness: 38,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#062a6f',
+                            titleFont: { family: '"Poppins"', size: 12, weight: 'bold' },
+                            bodyFont: { family: '"Poppins"', size: 12 },
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(c) {
+                                    return ' Collected: Rs. ' + Number(c.raw).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(226, 232, 240, 0.8)' },
+                            ticks: {
+                                font: { family: '"Poppins"', size: 10 },
+                                color: '#64748b',
+                                callback: function(val) { return 'Rs. ' + val.toLocaleString(); }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: '"Poppins"', size: 10 },
+                                color: '#475569'
+                            }
+                        }
+                    }
+                }
+            });
         }
     });
 </script>

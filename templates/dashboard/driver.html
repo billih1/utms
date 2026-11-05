@@ -1,54 +1,72 @@
 {% extends "base.html" %}
 
-{% block title %}Driver Panel - UTMS{% endblock %}
+{% block title %}Driver Panel • GCUF Transport{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Driver Control Panel</h1>
-            <p class="text-sm text-slate-500">Record vehicle movements, log daily departure/arrival, and report operational status.</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+
+    <!-- Hero Banner -->
+    <div class="bise-hero-gradient text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden border border-blue-400/20">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(245,158,11,0.3),transparent_50%)]"></div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                    <i data-lucide="steering-wheel" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Driver Logistics &bull; Campus Gate Dispatch</span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-white">Driver Control Panel</h1>
+                <p class="text-xs sm:text-sm text-blue-100">Record vehicle movements, departure/arrival timestamps, and operational status.</p>
+            </div>
+            <a href="{% url 'operations:driver_panel' %}" class="bise-btn-primary inline-flex items-center px-6 py-3.5 text-sm font-semibold shrink-0">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                <span>Log Trip Status</span>
+            </a>
         </div>
-        <a href="{% url 'operations:driver_panel' %}" class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-            Log Trip Status
-        </a>
     </div>
 
-    <!-- Quick instructions -->
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-sm text-amber-900 flex items-start space-x-3">
-        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+    <!-- Duty Guidelines Card -->
+    <div class="bise-card p-6 bg-amber-50/70 border-amber-200 flex items-start space-x-4">
+        <div class="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
         <div>
-            <h4 class="font-bold">Driver Duty Guidelines</h4>
-            <p class="mt-1 text-amber-800">Please enter your departure time when setting off from terminal and arrival time when arriving at campus. This keeps the Transport Office and students updated.</p>
+            <h4 class="font-bold text-amber-900 text-sm">Driver Duty Guidelines</h4>
+            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                Please enter your departure time when departing from the terminal and arrival time upon reaching campus. This updates the university Vehicle Entry Log in real time.
+            </p>
         </div>
     </div>
 
-    <!-- Trip Logs Table -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h3 class="text-base font-bold text-slate-900 mb-4">Your Recent Trip Entries</h3>
+    <!-- Recent Logs Table -->
+    <div class="bise-card p-6 sm:p-8">
+        <div class="mb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-700">LOGISTICS HISTORY</span>
+            <h3 class="text-lg font-bold text-slate-900">Your Recent Trip Entries</h3>
+        </div>
+
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-xs">
                 <thead>
-                    <tr class="border-b border-slate-200 text-xs text-slate-400 uppercase font-semibold">
-                        <th class="py-2.5">Date</th>
-                        <th class="py-2.5">Van #</th>
-                        <th class="py-2.5">Route</th>
-                        <th class="py-2.5">Departure</th>
-                        <th class="py-2.5">Arrival</th>
-                        <th class="py-2.5">Status</th>
+                    <tr class="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider rounded-xl">
+                        <th class="py-2.5 px-3 rounded-l-xl">Date</th>
+                        <th class="py-2.5 px-3">Van #</th>
+                        <th class="py-2.5 px-3">Route</th>
+                        <th class="py-2.5 px-3">Departure</th>
+                        <th class="py-2.5 px-3">Arrival</th>
+                        <th class="py-2.5 px-3 text-right rounded-r-xl">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
                     {% for l in recent_logs %}
-                    <tr class="hover:bg-slate-50">
-                        <td class="py-3 font-medium">{{ l.date }}</td>
-                        <td class="py-3 font-semibold text-slate-900">{{ l.van.van_number }}</td>
-                        <td class="py-3 text-slate-600">{{ l.route.route_name|default:"-" }}</td>
-                        <td class="py-3">{{ l.departure_time|default:"-" }}</td>
-                        <td class="py-3">{{ l.arrival_time|default:"-" }}</td>
-                        <td class="py-3">
-                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold
+                    <tr class="hover:bg-blue-50/50 transition">
+                        <td class="py-3 px-3">{{ l.date }}</td>
+                        <td class="py-3 px-3 font-bold text-slate-900">{{ l.van.van_number }}</td>
+                        <td class="py-3 px-3 text-slate-600">{{ l.route.route_name|default:"-" }}</td>
+                        <td class="py-3 px-3">{{ l.departure_time|default:"-" }}</td>
+                        <td class="py-3 px-3">{{ l.arrival_time|default:"-" }}</td>
+                        <td class="py-3 px-3 text-right">
+                            <span class="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold
                                 {% if l.status == 'Arrived' %}bg-emerald-100 text-emerald-800
                                 {% elif l.status == 'On Route' %}bg-blue-100 text-blue-800
                                 {% elif l.status == 'Departed' %}bg-amber-100 text-amber-800
@@ -59,12 +77,13 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-slate-400">No trips logged yet. Click "Log Trip Status" above.</td>
+                        <td colspan="6" class="py-8 text-center text-slate-400">No trips logged yet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
 </div>
 {% endblock %}

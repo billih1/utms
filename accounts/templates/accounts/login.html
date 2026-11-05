@@ -1,85 +1,112 @@
 {% extends "base.html" %}
 
-{% block title %}Sign In - UTMS Portal{% endblock %}
+{% block title %}Authorized Portal Sign In • GCUF Transport{% endblock %}
 
 {% block content %}
-<div class="min-h-[82vh] flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+<div class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative overflow-hidden">
 
-    <!-- Subtle 3D Ambient Background Lights (Hardware Accelerated) -->
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Ambient Radial Lighting (BISE Lahore Inspired) -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38rem] h-[38rem] bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-md w-full space-y-6 relative z-10 card-3d bg-white/95 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl border border-slate-200/90 shadow-2xl">
+    <div class="max-w-md w-full relative z-10 bise-card p-8 sm:p-10 shadow-2xl">
 
-        <!-- 3D University Branding Header -->
+        <!-- University Crest & Title -->
         <div class="text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white mb-4 shadow-xl shadow-blue-500/25 transform hover:scale-105 hover:rotate-2 transition duration-300">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-blue-500 text-white mb-4 shadow-lg shadow-blue-800/30 transform hover:scale-105 transition">
                 <i data-lucide="bus" class="w-8 h-8"></i>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">University Transport</h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">GCUF Transport Directorate &bull; Authorized Portal</p>
+
+            <div class="flex items-center justify-center space-x-2">
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">GCUF Transport Portal</h2>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-blue-600 text-white shadow-sm">GCUF</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Directorate of Fleet Operations &bull; Authorized Access Only</p>
         </div>
 
-        <!-- Demo Account Quick-Fill Pills (For Instant FYP Presentation) -->
-        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
-            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 text-center">
-                Demo Accounts Quick-Fill:
+        <!-- 1-Click Demo Accounts Quick-Fill -->
+        <div class="mt-6 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/90 space-y-2">
+            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 text-center flex items-center justify-center space-x-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Instant Demo Quick-Fill:</span>
             </div>
-            <div class="grid grid-cols-2 gap-1.5 text-xs font-bold">
+            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
                 <button type="button" onclick="fillCreds('admin', 'admin123')"
-                        class="px-2.5 py-1.5 rounded-xl bg-purple-100/80 hover:bg-purple-200 text-purple-900 border border-purple-200 transition flex items-center justify-center space-x-1">
+                        class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 transition flex items-center justify-center space-x-1.5 transform active:scale-95">
                     <span>👑 Admin</span>
                 </button>
                 <button type="button" onclick="fillCreds('accountant', 'accountant123')"
-                        class="px-2.5 py-1.5 rounded-xl bg-emerald-100/80 hover:bg-emerald-200 text-emerald-900 border border-emerald-200 transition flex items-center justify-center space-x-1">
+                        class="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 transition flex items-center justify-center space-x-1.5 transform active:scale-95">
                     <span>💳 Accountant</span>
                 </button>
                 <button type="button" onclick="fillCreds('driver', 'driver123')"
-                        class="px-2.5 py-1.5 rounded-xl bg-amber-100/80 hover:bg-amber-200 text-amber-900 border border-amber-200 transition flex items-center justify-center space-x-1">
+                        class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 transition flex items-center justify-center space-x-1.5 transform active:scale-95">
                     <span>🚐 Driver</span>
                 </button>
                 <button type="button" onclick="fillCreds('student', 'student123')"
-                        class="px-2.5 py-1.5 rounded-xl bg-blue-100/80 hover:bg-blue-200 text-blue-900 border border-blue-200 transition flex items-center justify-center space-x-1">
+                        class="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 transition flex items-center justify-center space-x-1.5 transform active:scale-95">
                     <span>🎓 Student</span>
                 </button>
             </div>
         </div>
 
-        <form class="space-y-4" method="post" id="loginForm">
+        <!-- Credentials Form -->
+        <form class="mt-6 space-y-4" method="post" id="loginForm">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-            <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs font-bold text-red-700 space-y-1">
+            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 space-y-1">
                 {% for err in form.non_field_errors %}
-                <p>{{ err }}</p>
+                <p class="flex items-center space-x-1.5">
+                    <i data-lucide="alert-octagon" class="w-4 h-4 flex-shrink-0 text-rose-600"></i>
+                    <span>{{ err }}</span>
+                </p>
                 {% endfor %}
             </div>
             {% endif %}
 
             <div>
                 <label for="id_username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
-                {{ form.username }}
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <input type="text" name="username" id="id_username" required
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900 text-sm font-medium transition placeholder-slate-400"
+                           placeholder="Enter your university username">
+                </div>
                 {% if form.username.errors %}
-                <p class="mt-1 text-xs text-red-600 font-semibold">{{ form.username.errors.0 }}</p>
+                <p class="mt-1 text-xs text-rose-600 font-semibold">{{ form.username.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <div>
                 <label for="id_password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
-                {{ form.password }}
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    </div>
+                    <input type="password" name="password" id="id_password" required
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-slate-900 text-sm font-medium transition placeholder-slate-400"
+                           placeholder="Enter your account password">
+                </div>
                 {% if form.password.errors %}
-                <p class="mt-1 text-xs text-red-600 font-semibold">{{ form.password.errors.0 }}</p>
+                <p class="mt-1 text-xs text-rose-600 font-semibold">{{ form.password.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <button type="submit"
-                    class="w-full flex justify-center py-3.5 px-4 rounded-2xl shadow-lg shadow-blue-600/25 text-sm font-extrabold text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 transform active:scale-95">
-                Authenticate & Access Dashboard
+                    class="bise-btn-primary w-full mt-2 flex items-center justify-center py-3.5 px-4 text-sm font-bold">
+                <span>Sign In to Dashboard</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
             </button>
         </form>
 
-        <div class="pt-3 border-t border-slate-100 text-center text-xs text-slate-400 font-medium">
-            Protected by Session Timeout &bull; PBKDF2 Encryption &bull; RBAC Guard
+        <div class="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-400 space-y-1 font-medium">
+            <p class="flex items-center justify-center space-x-1.5">
+                <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Protected by Session Timeout &bull; PBKDF2 Encryption &bull; RBAC Guard</span>
+            </p>
+            <p>Government College University Faisalabad (GCUF)</p>
         </div>
     </div>
 </div>

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900 selection:bg-blue-600 selection:text-white">
+<html lang="en" class="h-full bg-slate-50 selection:bg-blue-600 selection:text-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}UTMS - University Transport Management System{% endblock %}</title>
+    <title>{% block title %}GCUF Transport - Directorate of Transport{% endblock %}</title>
+
+    <!-- Google Fonts: Poppins (Exact Font from BISE Lahore) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,15 +16,16 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['"Poppins"', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
                     colors: {
-                        primary: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#0f172a',
-                            950: '#090d16',
+                        bise: {
+                            ice: '#cbd5e1',
+                            blue: '#1b62d4',
+                            deep: '#062a6f',
+                            midnight: '#051738',
+                            accent: '#1f6df2',
                         }
                     }
                 }
@@ -40,50 +46,85 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Modern 3D UI & High-FPS Hardware Accelerated Transformations */
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.92);
-            --glass-border: rgba(226, 232, 240, 0.85);
+        /* Exact BISE Lahore Header Gradient */
+        .bise-header-gradient {
+            background: linear-gradient(95deg, rgba(203, 213, 225, 0.97) 0%, rgba(147, 197, 253, 0.93) 45%, rgba(186, 230, 253, 0.96) 100%);
+            box-shadow: 0 10px 35px -20px rgba(30, 64, 175, 0.42);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        body {
-            perspective: 1200px;
-            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        /* Top Announcement Ticker Gradient */
+        .bise-ticker-gradient {
+            background: linear-gradient(90deg, rgba(224, 242, 254, 0.95) 0%, rgba(191, 219, 254, 0.95) 45%, rgba(219, 234, 254, 0.95) 100%);
+            border-bottom: 1px solid rgba(191, 219, 254, 0.9);
         }
 
-        /* 3D Interactive Card Lift (60 FPS CSS Hardware Accelerated) */
-        .card-3d {
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-            transform-style: preserve-3d;
+        /* Exact BISE Lahore Grand Footer Gradient */
+        .bise-footer-gradient {
+            background: linear-gradient(135deg, #062a6f 0%, #0b4ea8 35%, #1f6df2 70%, #0a2e63 100%);
+            box-shadow: 0 -25px 90px -30px rgba(2, 29, 71, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* BISE Lahore Hero Background */
+        .bise-hero-gradient {
+            background: linear-gradient(135deg, #051738 0%, #08285c 45%, #0d3d8a 100%);
+        }
+
+        /* 3D Elevated Cards (24px Radius matching BISE Lahore Online Systems) */
+        .bise-card {
+            border-radius: 24px;
+            background: #ffffff;
+            border: 1px solid rgba(203, 213, 225, 0.85);
+            box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.08), 0 4px 6px -4px rgba(30, 58, 138, 0.04);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+            transform: translateZ(0);
             will-change: transform, box-shadow;
-            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
         }
-        .card-3d:hover {
-            transform: translateY(-4px) translateZ(8px);
-            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-        }
-
-        /* Glassmorphic Navbar & Modals */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
+        .bise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(30, 58, 138, 0.12), 0 8px 10px -6px rgba(30, 58, 138, 0.06);
+            border-color: rgba(147, 197, 253, 0.9);
         }
 
-        .glass-dark {
-            background: rgba(15, 23, 42, 0.82);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Primary Button Style from BISE Lahore */
+        .bise-btn-primary {
+            background-color: #1f6df2;
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: 14px;
+            box-shadow: 0 10px 20px -5px rgba(31, 109, 242, 0.35);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .bise-btn-primary:hover {
+            background-color: #1a5bc9;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(31, 109, 242, 0.45);
         }
 
-        /* Subtle 3D Depth Shadows */
-        .depth-1 {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        /* Secondary Glass Button Style from BISE Lahore */
+        .bise-btn-glass {
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .depth-2 {
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+        .bise-btn-glass:hover {
+            border-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        /* Micro-Grid Background Pattern */
+        .bise-grid-pattern {
+            background-color: #f8fafc;
+            background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
         @media print {
@@ -94,224 +135,368 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full flex flex-col bg-slate-50 text-slate-800 antialiased" x-data="{ sidebarOpen: false }" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased" x-data="{ mobileNav: false, reportsMenu: false }" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-    <!-- Top Navigation Header with 3D Glass Depth -->
-    <header class="glass-dark text-white sticky top-0 z-30 no-print border-b border-slate-800/80 shadow-md">
-        <div class="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                {% if user.is_authenticated %}
-                <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition focus:outline-none">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
-                {% endif %}
-                <a href="{% url 'dashboard:home' %}" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition transform">
-                        <i data-lucide="bus" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-1.5">
-                            <span class="text-xl font-extrabold tracking-tight text-white">UTMS</span>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">GCUF Transport</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 hidden sm:block">AI-Assisted University Fleet System</p>
-                    </div>
-                </a>
+    <!-- BISE Lahore Announcement Bar -->
+    <div class="bise-ticker-gradient text-slate-800 text-xs py-2 px-4 sm:px-8 border-b no-print">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="flex items-center space-x-2.5 overflow-hidden">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-600 text-white tracking-wider flex-shrink-0 animate-pulse">
+                    Notice
+                </span>
+                <span class="font-semibold text-slate-800 truncate">
+                    Semester Fall 2026 Fleet Operations Active &bull; National Bank of Pakistan (NBP) Challans with QR Verification Now Issued
+                </span>
             </div>
-
-            <!-- Header Right Menu -->
-            {% if user.is_authenticated %}
-            <div class="flex items-center space-x-4">
-                <div class="text-right hidden sm:block">
-                    <div class="text-xs font-bold text-slate-200">{{ user.get_full_name|default:user.username }}</div>
-                    <div class="mt-0.5">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide
-                            {% if user.role == 'Admin' %}bg-purple-950/80 text-purple-300 border border-purple-700/60
-                            {% elif user.role == 'Accountant' %}bg-emerald-950/80 text-emerald-300 border border-emerald-700/60
-                            {% elif user.role == 'Driver' %}bg-amber-950/80 text-amber-300 border border-amber-700/60
-                            {% else %}bg-blue-950/80 text-blue-300 border border-blue-700/60{% endif %}">
-                            {{ user.role }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <a href="{% url 'accounts:change_password' %}" title="Change Password" class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                    </a>
-                    <!-- Security-Hardened Logout Form -->
-                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" title="Sign Out" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-red-600/80 hover:bg-red-600 text-white transition shadow-sm hover:shadow-red-600/20">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                            <span class="hidden sm:inline">Logout</span>
-                        </button>
-                    </form>
-                </div>
+            <div class="flex items-center space-x-4 flex-shrink-0 text-[11px] font-medium text-slate-700">
+                <span class="hidden md:inline-flex items-center">
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 mr-1 text-blue-600"></i>
+                    <span>Helpline: +92 41 9200886</span>
+                </span>
+                <span class="flex items-center text-blue-800 font-bold bg-white/70 px-2.5 py-0.5 rounded-full border border-blue-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
+                    <span id="liveClock">GCUF Transport Online</span>
+                </span>
             </div>
-            {% else %}
-            <div>
-                <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-md shadow-blue-600/20">
-                    Sign In
-                </a>
-            </div>
-            {% endif %}
         </div>
-    </header>
+    </div>
 
-    <div class="flex-1 flex overflow-hidden">
-        {% if user.is_authenticated %}
-        <!-- Sidebar Navigation -->
-        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-               class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-white/95 backdrop-blur-xl border-r border-slate-200/90 flex flex-col transition-transform duration-200 ease-in-out md:translate-x-0 no-print shadow-sm">
-            <div class="flex-1 overflow-y-auto py-5 px-3.5 space-y-1 text-sm font-medium">
+    <!-- BISE Lahore Metallic Ice-Blue Gradient Main Header -->
+    <header class="bise-header-gradient sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between gap-4">
 
-                <!-- Universal / Dashboard -->
-                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition font-semibold group">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-slate-400 group-hover:text-blue-600"></i>
+            <!-- University Brand Crest & Title -->
+            <a href="{% url 'dashboard:home' %}" class="flex items-center space-x-2.5 sm:space-x-3.5 group shrink-0">
+                <div class="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-blue-500 flex items-center justify-center shadow-md shadow-blue-900/30 border border-white/60 group-hover:scale-105 transition transform">
+                    <i data-lucide="bus" class="w-6 h-6 sm:w-7 sm:h-7 text-white"></i>
+                </div>
+                <div class="flex flex-col leading-tight">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">GCUF Transport</span>
+                        <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-blue-600 text-white shadow-sm">Portal</span>
+                    </div>
+                    <span class="text-[11px] sm:text-xs text-slate-700 font-medium hidden sm:block">Directorate of Fleet Operations &bull; GCUF</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Menu -->
+            {% if user.is_authenticated %}
+            <nav class="hidden lg:flex items-center space-x-1 font-medium text-xs xl:text-sm text-slate-800">
+                <a href="{% url 'dashboard:home' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if request.path == '/dashboard/' or request.path == '/' %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
                     Dashboard
                 </a>
 
                 {% if user.role == 'Admin' or user.is_superuser %}
-                <!-- Admin Navigation -->
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Transport Core</div>
-
-                <a href="{% url 'students:student_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="users" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Students Roster
+                <a href="{% url 'students:student_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/students/' in request.path and not '/import/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
+                    Students
                 </a>
-                <a href="{% url 'transport:route_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Routes & Fare
+                <a href="{% url 'transport:route_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/routes/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
+                    Routes
                 </a>
-                <a href="{% url 'transport:van_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="bus" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Vans & Capacity
+                <a href="{% url 'transport:van_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/vans/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
+                    Vans
                 </a>
-
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Finance & Billing</div>
-                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Fee Management
+                <a href="{% url 'finance:fee_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/finance/fees/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
+                    Fees &amp; Dues
                 </a>
-                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Generate Dues
+                <a href="{% url 'ai_predictor:insights' %}"
+                   class="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl transition-colors text-purple-900 hover:bg-white/75 {% if '/ai/' in request.path %}bg-white/90 font-bold shadow-sm border border-purple-300 text-purple-950{% endif %}">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i>
+                    <span>AI Predictor</span>
                 </a>
 
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Analytics & AI</div>
-                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-xl text-purple-700 bg-purple-50/80 hover:bg-purple-100 font-bold transition">
-                    <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
-                    AI Defaulter Predictor
-                </a>
-                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Collection Report
-                </a>
-                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
-                    Defaulter Report
-                </a>
-                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Remaining Dues
-                </a>
-
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Operations & Admin</div>
-                <a href="{% url 'operations:vehicle_log_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="clipboard-list" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Vehicle Entry Log
-                </a>
-                <a href="{% url 'accounts:user_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="shield-check" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    User Accounts & RBAC
-                </a>
+                <!-- Reports Dropdown -->
+                <div class="relative" @click.away="reportsMenu = false">
+                    <button @click="reportsMenu = !reportsMenu" type="button"
+                            class="inline-flex items-center space-x-1 px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/reports/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm border border-white/70{% endif %}">
+                        <span>Reports</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-600"></i>
+                    </button>
+                    <div x-show="reportsMenu"
+                         x-transition
+                         class="absolute right-0 mt-2 w-56 rounded-2xl bg-white p-2 shadow-2xl border border-slate-200 z-50 text-xs font-semibold text-slate-700"
+                         style="display: none;">
+                        <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 text-blue-600"></i>
+                            <span>Monthly Collection</span>
+                        </a>
+                        <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-amber-50 hover:text-amber-700 transition">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 text-amber-500"></i>
+                            <span>Defaulter Report</span>
+                        </a>
+                        <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+                            <i data-lucide="clock" class="w-4 h-4 mr-2 text-slate-500"></i>
+                            <span>Remaining Dues</span>
+                        </a>
+                        <div class="my-1 border-t border-slate-100"></div>
+                        <a href="{% url 'operations:vehicle_log_list' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 mr-2 text-blue-600"></i>
+                            <span>Vehicle Entry Log</span>
+                        </a>
+                        <a href="{% url 'students:student_import' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+                            <i data-lucide="file-up" class="w-4 h-4 mr-2 text-blue-600"></i>
+                            <span>Import CSV / Excel</span>
+                        </a>
+                        <a href="{% url 'accounts:user_list' %}" class="flex items-center px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition">
+                            <i data-lucide="shield-check" class="w-4 h-4 mr-2 text-blue-600"></i>
+                            <span>User Accounts</span>
+                        </a>
+                    </div>
+                </div>
 
                 {% elif user.role == 'Accountant' %}
-                <!-- Accountant Navigation -->
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Fee Collection</div>
-                <a href="{% url 'finance:fee_list' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="receipt" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Fee Records & Payments
+                <a href="{% url 'finance:fee_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/finance/fees/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm{% endif %}">
+                    Fee Collection
                 </a>
-                <a href="{% url 'finance:generate_dues' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="calendar-plus" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Generate Monthly Dues
+                <a href="{% url 'finance:generate_dues' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 {% if '/finance/generate/' in request.path %}bg-white/90 text-blue-900 font-bold shadow-sm{% endif %}">
+                    Generate Dues
                 </a>
-
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Reports & Insights</div>
-                <a href="{% url 'ai_predictor:insights' %}" class="flex items-center px-3.5 py-2 rounded-xl text-purple-700 bg-purple-50/80 hover:bg-purple-100 font-bold transition">
-                    <i data-lucide="sparkles" class="w-4 h-4 mr-3 text-purple-600"></i>
-                    AI Defaulter Predictor
+                <a href="{% url 'finance:bulk_print_challans' %}" target="_blank"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950">
+                    Bulk Challans
                 </a>
-                <a href="{% url 'reports:monthly_collection' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 mr-3 text-slate-400"></i>
+                <a href="{% url 'ai_predictor:insights' %}"
+                   class="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl transition-colors text-purple-900 hover:bg-white/75 {% if '/ai/' in request.path %}bg-white/90 font-bold shadow-sm border border-purple-300{% endif %}">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i>
+                    <span>AI Predictor</span>
+                </a>
+                <a href="{% url 'reports:monthly_collection' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950">
                     Collection Report
-                </a>
-                <a href="{% url 'reports:defaulter_report' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-3 text-amber-500"></i>
-                    Defaulter Report
-                </a>
-                <a href="{% url 'reports:due_remaining' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="clock" class="w-4 h-4 mr-3 text-slate-400"></i>
-                    Remaining Dues
                 </a>
 
                 {% elif user.role == 'Driver' %}
-                <!-- Driver Navigation -->
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Driver Duty</div>
-                <a href="{% url 'operations:driver_panel' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-amber-700 transition">
-                    <i data-lucide="steering-wheel" class="w-4 h-4 mr-3 text-amber-600"></i>
+                <a href="{% url 'operations:driver_panel' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950 font-bold text-amber-900 bg-amber-50">
                     Driver Trip Panel
+                </a>
+                <a href="{% url 'operations:vehicle_log_list' %}"
+                   class="px-3 py-2 rounded-xl transition-colors hover:bg-white/75 hover:text-slate-950">
+                    Duty Logs
                 </a>
 
                 {% else %}
-                <!-- Student Navigation -->
-                <div class="pt-4 pb-1 px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">My Transport</div>
-                <a href="{% url 'dashboard:home' %}" class="flex items-center px-3.5 py-2 rounded-xl text-slate-700 hover:bg-slate-100/90 hover:text-blue-700 transition">
-                    <i data-lucide="user" class="w-4 h-4 mr-3 text-blue-600"></i>
-                    My Route & Fee Status
+                <!-- Student -->
+                <a href="{% url 'dashboard:home' %}"
+                   class="px-3 py-2 rounded-xl transition-colors bg-white/90 text-blue-900 font-bold shadow-sm">
+                    My Route &amp; Challans
                 </a>
                 {% endif %}
-            </div>
+            </nav>
 
-            <!-- Footer in sidebar -->
-            <div class="p-4 border-t border-slate-100 text-xs text-slate-400">
-                <div class="font-bold text-slate-600">UTMS FYP 2026</div>
-                <div class="text-[11px] text-slate-400">GCUF Transport Directorate</div>
-            </div>
-        </aside>
-        {% endif %}
-
-        <!-- Main Content View Area -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <!-- Messages Banner -->
-            {% if messages %}
-            <div class="max-w-7xl mx-auto mb-6 space-y-2.5">
-                {% for message in messages %}
-                <div class="flex items-center justify-between p-4 rounded-2xl shadow-sm text-sm font-semibold
-                    {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
-                    {% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200
-                    {% elif message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
-                    {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-                    <div class="flex items-center space-x-2.5">
-                        <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
-                        <span>{{ message }}</span>
-                    </div>
+            <!-- User Profile & Action Pill -->
+            <div class="hidden sm:flex items-center space-x-3 shrink-0">
+                <div class="text-right">
+                    <div class="text-xs font-bold text-slate-900">{{ user.get_full_name|default:user.username }}</div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase
+                        {% if user.role == 'Admin' %}bg-purple-100 text-purple-800 border border-purple-200
+                        {% elif user.role == 'Accountant' %}bg-emerald-100 text-emerald-800 border border-emerald-200
+                        {% elif user.role == 'Driver' %}bg-amber-100 text-amber-800 border border-amber-200
+                        {% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}">
+                        {{ user.role }}
+                    </span>
                 </div>
-                {% endfor %}
+
+                <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-300">
+                    <a href="{% url 'accounts:change_password' %}" title="Change Password"
+                       class="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-white/80 transition">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </a>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" title="Logout"
+                                class="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition shadow-sm">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button @click="mobileNav = !mobileNav" class="lg:hidden p-2 rounded-2xl bg-white/80 text-slate-800 border border-slate-300 hover:bg-white transition">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            {% else %}
+            <!-- Unauthenticated Sign In CTA -->
+            <div>
+                <a href="{% url 'accounts:login' %}"
+                   class="bise-btn-primary inline-flex items-center px-6 py-2.5 text-xs uppercase tracking-wider font-extrabold shadow-md">
+                    <span>Authorized Sign In</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 ml-1.5"></i>
+                </a>
             </div>
             {% endif %}
 
-            <div class="max-w-7xl mx-auto">
-                {% block content %}{% endblock %}
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        {% if user.is_authenticated %}
+        <div x-show="mobileNav"
+             x-transition
+             class="lg:hidden border-t border-slate-300 bg-white/95 backdrop-blur-xl px-4 py-4 space-y-2 text-sm font-semibold text-slate-800 no-print"
+             style="display: none;">
+            <a href="{% url 'dashboard:home' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Dashboard</a>
+            {% if user.role == 'Admin' or user.is_superuser %}
+            <a href="{% url 'students:student_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Students Roster</a>
+            <a href="{% url 'transport:route_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Routes &amp; Fare</a>
+            <a href="{% url 'transport:van_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Vans &amp; Capacity</a>
+            <a href="{% url 'finance:fee_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Fees &amp; Dues</a>
+            <a href="{% url 'finance:generate_dues' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Generate Dues</a>
+            <a href="{% url 'ai_predictor:insights' %}" class="block px-3 py-2 rounded-xl hover:bg-purple-50 text-purple-800">AI Defaulter Predictor</a>
+            <a href="{% url 'reports:monthly_collection' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Monthly Collection Report</a>
+            <a href="{% url 'reports:defaulter_report' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Defaulter Report</a>
+            <a href="{% url 'operations:vehicle_log_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Vehicle Entry Log</a>
+            <a href="{% url 'students:student_import' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">Import CSV / Excel</a>
+            <a href="{% url 'accounts:user_list' %}" class="block px-3 py-2 rounded-xl hover:bg-slate-100">User Accounts</a>
+            {% endif %}
+            <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-600">{{ user.username }} ({{ user.role }})</span>
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold">Logout</button>
+                </form>
             </div>
-        </main>
-    </div>
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 bise-grid-pattern">
+        <!-- Toast Flash Messages -->
+        {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 space-y-2.5">
+            {% for message in messages %}
+            <div class="flex items-center justify-between p-4 rounded-2xl shadow-sm text-xs sm:text-sm font-semibold
+                {% if message.tags == 'error' %}bg-rose-50 text-rose-800 border border-rose-200
+                {% elif message.tags == 'warning' %}bg-amber-50 text-amber-800 border border-amber-200
+                {% elif message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+                {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="{% if message.tags == 'error' %}alert-octagon{% elif message.tags == 'warning' %}alert-triangle{% elif message.tags == 'success' %}check-circle-2{% else %}info{% endif %}" class="w-5 h-5 flex-shrink-0"></i>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Grand BISE Lahore Royal-to-Navy Gradient Institutional Footer -->
+    <footer class="bise-footer-gradient text-slate-100 relative overflow-hidden no-print">
+        <!-- Inner Ambient Lighting Highlights (Exact from BISE Lahore) -->
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(191,219,254,0.24),transparent_28%),radial-gradient(ellipse_at_bottom_right,rgba(255,255,255,0.2),transparent_30%),linear-gradient(120deg,rgba(255,255,255,0.16),transparent_35%,rgba(255,255,255,0.05))]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 relative z-10 grid gap-10 sm:gap-12 md:grid-cols-2 lg:grid-cols-4">
+
+            <!-- Column 1: Brand & Mission -->
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                        <i data-lucide="bus" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white tracking-tight">GCUF Transport</h4>
+                        <p class="text-[11px] text-blue-200 font-medium">Directorate of Fleet Operations</p>
+                    </div>
+                </div>
+                <p class="text-xs leading-relaxed text-slate-200/90 font-medium">
+                    Centralized transport management system serving thousands of students and faculty members across Faisalabad with automated dues, QR vouchers, and AI-driven defaulter predictions.
+                </p>
+                <div class="flex items-center space-x-2 pt-2">
+                    <span class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition cursor-pointer">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                    </span>
+                    <span class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition cursor-pointer">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                    </span>
+                    <span class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white transition cursor-pointer">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Column 2: Fleet E-Services -->
+            <div class="space-y-3">
+                <h5 class="text-sm font-bold uppercase tracking-wider text-white border-b border-white/20 pb-2">E-Services &amp; Fleet</h5>
+                <ul class="space-y-2 text-xs font-medium text-slate-200">
+                    <li><a href="{% url 'dashboard:home' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Dashboard Overview</a></li>
+                    <li><a href="{% url 'students:student_list' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Student Transport Roster</a></li>
+                    <li><a href="{% url 'transport:route_list' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Designated Route Fares</a></li>
+                    <li><a href="{% url 'transport:van_list' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> 20-22 Seat Capacity Guard</a></li>
+                    <li><a href="{% url 'operations:vehicle_log_list' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Daily Vehicle Entry Log</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Finance & Banking -->
+            <div class="space-y-3">
+                <h5 class="text-sm font-bold uppercase tracking-wider text-white border-b border-white/20 pb-2">Banking &amp; Dues</h5>
+                <ul class="space-y-2 text-xs font-medium text-slate-200">
+                    <li><a href="{% url 'finance:fee_list' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> National Bank of Pakistan (NBP)</a></li>
+                    <li><a href="{% url 'finance:generate_dues' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Batch Dues Generation</a></li>
+                    <li><a href="{% url 'finance:bulk_print_challans' %}" target="_blank" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> 3-Part Deposit Challans</a></li>
+                    <li><a href="{% url 'ai_predictor:insights' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> AI Defaulter Risk Predictor</a></li>
+                    <li><a href="{% url 'reports:monthly_collection' %}" class="hover:text-white hover:underline transition flex items-center"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1 text-blue-300"></i> Official Collection Ledgers</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: University Contact & Office -->
+            <div class="space-y-3">
+                <h5 class="text-sm font-bold uppercase tracking-wider text-white border-b border-white/20 pb-2">Contact &amp; Location</h5>
+                <div class="space-y-2.5 text-xs text-slate-200 font-medium">
+                    <p class="flex items-start space-x-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-blue-300 flex-shrink-0 mt-0.5"></i>
+                        <span>Transport Directorate, Allama Iqbal Road, GCUF Main Campus, Faisalabad</span>
+                    </p>
+                    <p class="flex items-center space-x-2">
+                        <i data-lucide="phone" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
+                        <span>+92 41 9200886 &bull; Ext: 104</span>
+                    </p>
+                    <p class="flex items-center space-x-2">
+                        <i data-lucide="mail" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
+                        <span>transport@gcuf.edu.pk</span>
+                    </p>
+                    <p class="flex items-center space-x-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-blue-300 flex-shrink-0"></i>
+                        <span>Mon - Fri: 08:00 AM - 04:00 PM</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sub-footer Bar -->
+        <div class="border-t border-white/10 bg-black/20 py-4 px-4 sm:px-8 text-center text-xs text-blue-200 font-medium">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div>&copy; 2026 Government College University Faisalabad &bull; All Rights Reserved.</div>
+                <div>Department of Information Technology &bull; Project Code: <span class="font-mono font-bold text-white">TMS-FYP-2026</span></div>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Initialize Lucide icons on DOM load
+        // Initialize Lucide icons
         lucide.createIcons();
+
+        // Live Clock
+        function updateClock() {
+            const el = document.getElementById('liveClock');
+            if (el) {
+                const now = new Date();
+                el.innerText = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' • ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
     {% block extra_js %}{% endblock %}
 </body>
