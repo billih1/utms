@@ -112,11 +112,14 @@ if os.environ.get('VERCEL'):
     tmp_db = tmp_dir / 'db.sqlite3'
     orig_db = BASE_DIR / 'db.sqlite3'
     if not tmp_db.exists() and orig_db.exists():
-        shutil.copy2(orig_db, tmp_db)
+        try:
+            shutil.copy2(orig_db, tmp_db)
+        except Exception:
+            pass
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': tmp_db if tmp_db.exists() else (BASE_DIR / 'db.sqlite3'),
+            'NAME': str(tmp_db),
         }
     }
 else:

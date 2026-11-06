@@ -11,7 +11,10 @@ from finance.models import FeePayment
 from .models import Prediction
 from .features import extract_student_features
 
-MODEL_DIR = settings.BASE_DIR / 'ml_models'
+if os.environ.get('VERCEL'):
+    MODEL_DIR = Path('/tmp/ml_models')
+else:
+    MODEL_DIR = settings.BASE_DIR / 'ml_models'
 MODEL_PATH = MODEL_DIR / 'defaulter_model.joblib'
 
 

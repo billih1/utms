@@ -11,10 +11,11 @@ build/
 # Django
 *.log
 local_settings.py
-db.sqlite3
+# db.sqlite3 (tracked to pre-seed Vercel serverless cold starts)
 db.sqlite3-journal
 media/
-staticfiles/
+staticfiles/*
+!staticfiles/.gitkeep
 
 # Environment
 .env
